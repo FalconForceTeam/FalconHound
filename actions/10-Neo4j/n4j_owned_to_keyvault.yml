@@ -1,0 +1,16 @@
+Name: AZ owned resource with a path to a Keyvaults
+ID: N4J_Owned_to_KeyVaults
+Description: Counts all direct and nested paths to Keyvaults from owned resources.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (u {owned: true})-[r]->(g:AZKeyVault) 
+  WITH u.Name as Name, COUNT(g.Name) as KeyVaultCount, COLLECT(g.Name) as KeyVaults
+  RETURN {Name: Name, KeyVaultCount: KeyVaultCount, KeyVaults: KeyVaults} as info
+Targets:
+  - Name: Sentinel
+    Enabled: true

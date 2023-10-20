@@ -1,0 +1,25 @@
+Name: AD user with a path to Domain Admin
+ID: N4J_AD_User_paths_to_DA
+Description: Counts all shortest paths to Domain Admin from all users and lists the path and number of hops.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (x:User) MATCH (y:Group) WHERE y.objectid ENDS WITH '-512'
+  MATCH p = allShortestpaths((x)-[*1..]->(y))
+  WITH p, LENGTH(p) as hops,
+  [a in NODES(p)|a.name] as nod,
+  [b in NODES(p)|LABELS(b)[0]] as labl,
+  [c IN RELATIONSHIPS(p)|TYPE(c)] as rels
+  WHERE hops > 1
+  RETURN {Hops:hops, Nodes:nod, Labels:labl, EdgeTypes:rels}  
+  LIMIT 25
+Targets:
+  - Name: CSV
+    Enabled: true
+    Path: output/user_to_da_paths.csv
+  - Name: Sentinel
+    Enabled: true

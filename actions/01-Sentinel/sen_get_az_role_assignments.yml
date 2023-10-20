@@ -1,0 +1,33 @@
+Name: New Azure role assignments
+ID: SEN_AZ_Role_Assignments
+Description: Gets all new Azure role assignments
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                                               # Enable to run this action
+Debug: false                                                 # Enable to see query results in the console
+SourcePlatform: Sentinel                                    # Sentinel, Watchlist, Neo4j, CSV, MDE, Graph, Splunk
+Query: |
+  let timeframe = 15m;
+  AuditLogs
+  | where ingestion_time() >= ago(timeframe)
+  | where OperationName startswith "Add member to role"
+  | extend TargetResources=parse_json(TargetResources)
+  | extend ObjectId = TargetResources.[0].id, userPrincipalName=TargetResources.[0].userPrincipalName, modifiedProperties=TargetResources.[0].modifiedProperties
+  | extend RoleObjectId = tostring(modifiedProperties[0].newValue),TenantId=AADTenantId
+  | extend RoleObjectId=replace_regex(RoleObjectId,'\"', '')
+  | project TenantId,ObjectId,RoleObjectId,userPrincipalName,TimeGenerated
+Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH toUpper($ObjectId) AS ObjectId, toUpper($RoleObjectId + '@' + $TenantId) AS TargetObjectId, $TimeGenerated AS TimeGenerated
+      MATCH (x:AZUser {objectid:ObjectId})
+      MATCH (y:AZRole {objectid:TargetObjectId})
+      MERGE (x)-[r:AZHasRole]-(y)
+      SET r.source = 'falconhound', r.since = TimeGenerated
+    Parameters:
+      ObjectId: ObjectId
+      RoleObjectId: RoleObjectId
+      TenantId: TenantId
+      TimeGenerated: TimeGenerated

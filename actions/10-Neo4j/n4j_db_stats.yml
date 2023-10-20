@@ -1,0 +1,26 @@
+Name: N4J DB Stats
+ID: N4J_DB_Stats
+Description: This action gets all relevant unit counts from BloodHound.
+Author: FalconForce
+Version: '0.8'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j
+Query: |
+  MATCH (x) RETURN {Class:'Node',Type:'All',Count:COUNT(x)} AS Stats
+  UNION
+  MATCH (x) WITH x UNWIND LABELS(x) AS labels WITH DISTINCT labels AS type, COUNT(x) AS count
+  RETURN {Class:'Node',Type:type,Count:count} AS Stats ORDER BY type
+  UNION
+  MATCH ()-[r]->() RETURN {Class:'Edge',Type:'All',Count:COUNT(r)} AS Stats
+  UNION
+  MATCH ()-[r{isazure:true}]->() RETURN {Class:'Edge',Type:'Azure',Count:COUNT(r)} AS Stats
+  UNION
+  MATCH ()-[r]->() WITH DISTINCT TYPE(r) AS type, COUNT(r) AS count
+  RETURN {Class:'Edge',Type:type,Count:count} AS Stats ORDER BY type
+  UNION
+  MATCH ()-[r{isacl:true}]->() RETURN {Class:'Edge',Type:'ACL',Count:COUNT(r)} AS Stats
+Targets:
+  - Name: Sentinel
+    Enabled: true

@@ -1,0 +1,15 @@
+Name: Kerberoastable User with a Session on a Computer
+ID: N4J_Kerberoastable_User_with_Session
+Description: Searches for kerberoastable users with a session on a computer
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH p=(k:User {hasspn:true})-[r:HasSession]-(c:Computer)  
+  RETURN {UserName: k.name, Computer: c.name, UserHasAlerts: k.owned, ComputerHasAlerts: c.owned, ComputerIsExposed: c.exposed, ComputerIsVulnerable: c.exploitable } as info
+Targets:
+  - Name: Sentinel
+    Enabled: true

@@ -1,0 +1,18 @@
+Name: Azure Subscription Owner list
+ID: N4J_Azure_Subscription_Owners
+Description: This action lists all Azure subscriptions and their owners.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: false                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH p = (n)-[r:AZOwns|AZUserAccessAdministrator]->(g:AZSubscription) 
+  RETURN {Name:g.name , Count:COUNT(g.name), Role:type(r), Owners:COLLECT(n.name)}
+Targets:
+  - Name: CSV
+    Enabled: true
+    Path: output/azusers_subscription_owners.csv
+  - Name: Sentinel
+    Enabled: true

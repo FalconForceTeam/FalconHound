@@ -1,0 +1,33 @@
+Name:                       # Choose a name that describes the action
+ID:                         # Unique ID (short version of the name, no spaces, will end up in the logs)
+Description:                # Short description (one-liner)
+Author: FalconForce         # Optional: Author of the action
+Version: '1.0'              # Optional: Version of the action
+Info: |-                    # Optional: Additional information about the action
+Active: true                # Enable to run this action
+Debug: true                 # Enable to see verbose results on the console
+SourcePlatform: MDE         # Supported sources; Sentinel, Neo4j, MDE, Graph
+Query: |                    # Query to run against the source platform
+  -query here-
+Targets:                    # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Splunk)
+  - Name: CSV
+    Enabled: true
+    Path: output/get_sessions_mde.csv
+  - Name: Sentinel
+    Enabled: true
+  - Name: Splunk
+    Enabled: true    
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      MATCH (x:Computer {name:$device_name}) SET c.exploitable = true, c.exploits = $cve_ids
+    Parameters:
+      device_name: DeviceName
+      cve_ids: CveIds
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_MDE_Exploitable_Machines
+    DisplayName: MDE Exploitable Machines
+    SearchKey: DeviceName
+    Overwrite: true       # Overwrite the watchlist with the query results, when false it will append the results to the watchlist
+

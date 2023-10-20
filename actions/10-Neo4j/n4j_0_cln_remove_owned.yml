@@ -1,0 +1,12 @@
+Name: CLEANUP - Remove Owned property where there are no AlertIds
+ID: N4J_CLN_Remove_Owned
+Description: Removes the Owned proprety from nodes in BloodHound that don't have any alerts in Sentinel.
+Author: FalconForce
+Version: '0.8'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+    MATCH (x{owned:True}) WHERE x.alertid[0] IS NULL SET x.owned=False
+Targets: []

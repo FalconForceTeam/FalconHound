@@ -1,0 +1,29 @@
+Name: AAD User with path to ManagedIdentity
+ID: N4J_AAD_User_to_ManagedIdentity
+Description: Gets all paths to managed identities from users and returns the users, roles and managed identities.
+Author: FalconForce
+Version: '1.0'
+Info: |
+  This query disregards the GlobalAdmin role, as this is a high-value role and should be handled separately.
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (u:AZUser), (m:AZServicePrincipal {serviceprincipaltype: 'ManagedIdentity'})
+  MATCH p = shortestPath((u)-[*..]->(m))
+  WHERE NONE(r IN relationships(p) WHERE type(r) = 'AZGlobalAdmin')
+  WITH m, [n IN nodes(p) WHERE n:AZUser | n.name] AS InboundUsers, [r IN relationships(p) | TYPE(r)] AS Roles
+  RETURN {ManagedIdentity: m.name, Roles: Roles, InboundUsers: InboundUsers}
+Targets:
+  - Name: CSV
+    Enabled: false
+    Path: output/azuser_to_highvaluecount.csv
+  - Name: Sentinel
+    BHQuery: |
+      MATCH (u:AZUser), (m:AZServicePrincipal {serviceprincipaltype: 'ManagedIdentity'}) 
+      MATCH p = shortestPath((u)-[*..]->(m)) 
+      WHERE NONE(r IN relationships(p) 
+      WHERE type(r) = 'AZGlobalAdmin') RETURN p
+    Enabled: true
+  - Name: Splunk
+    Enabled: false

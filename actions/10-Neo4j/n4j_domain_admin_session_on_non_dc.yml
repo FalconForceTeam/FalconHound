@@ -1,0 +1,26 @@
+Name: AD Domain Admin Session on Non-DC
+ID: N4J_AD_DA_Session_on_Non_DC
+Description: This action looks for Domain Admin sessions on non-domain controllers.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (dc:Computer)-[:MemberOf]->(g:Group) 
+  WHERE g.name CONTAINS "DOMAIN CONTROLLERS" 
+  WITH COLLECT(dc.name) as dcs MATCH (c:Computer) 
+  WHERE NOT c.name in dcs 
+  MATCH p=(c)-[:HasSession]->(n:User)-[:MemberOf]->(g:Group)  
+  WHERE g.name STARTS WITH "DOMAIN ADMINS"  
+  RETURN {Name: n.name, LoggedOnTo: c.name, HighValue: n.highvalue, Sensitive: n.sensitive, Exploitable: c.exploitable, Exposed: c.exposed, Owned: c.owned}
+Targets:
+  - Name: Sentinel
+    Enabled: true
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_DA_Session_on_Non_DC
+    DisplayName: Domain Admin Session on Non-DC
+    SearchKey: Name
+    Overwrite: true

@@ -1,0 +1,41 @@
+Name: New AAD user creations
+ID: SEN_AAD_New_User_Creations
+Description: Collects new AAD / EntraId user accounts created in the last 15 minutes, including Guest accounts.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                                               # Enable to run this action
+Debug: false                                                 # Enable to see query results in the console
+SourcePlatform: Sentinel                                    # Sentinel, Watchlist, Neo4j, CSV, MDE, Graph, Splunk
+Query: |
+  let timeframe = 15m;
+  AuditLogs
+  | where ingestion_time() >= ago(timeframe)
+  | where OperationName contains "Add user" 
+  | extend TargetResources=parse_json(TargetResources)
+  | extend ObjectId = TargetResources.[0].id, userPrincipalName=TargetResources.[0].userPrincipalName, modifiedProperties=TargetResources.[0].modifiedProperties
+  | extend displayName=tostring(modifiedProperties[2].newValue),TenantId=AADTenantId
+  | extend displayName=replace_regex(displayName,'\\["|\\"]', '')
+  | project TenantId,ObjectId,displayName,userPrincipalName,TimeGenerated
+Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH toUpper($ObjectId) AS ObjectId, toUpper($userPrincipalName) AS UserPrincipalName, $displayName AS displayName, toUpper($TenantId) AS TenantId, $TimeGenerated AS TimeGenerated
+      MERGE (x:AZBase {objectid:ObjectId})
+      SET x:AZUser, x+={
+      name: UserPrincipalName,
+      userprincipalname: UserPrincipalName,
+      tenantid: TenantId,
+      objectid: ObjectId,
+      displayname: displayName,
+      highvalue:False,
+      falconhound:True,
+      fhdate: TimeGenerated
+      }
+    Parameters:
+      ObjectId: ObjectId
+      userPrincipalName: userPrincipalName
+      displayName: displayName
+      TenantId: TenantId
+      TimeGenerated: TimeGenerated

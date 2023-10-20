@@ -1,0 +1,20 @@
+Name: Azure Resource Owner list
+ID: BH_Azure_Owners_list
+Description: This action lists all Azure resources and their owners
+Author: FalconForce
+Version: '1.0'
+Info: |
+  This is intended to be used as an enrichment list to quantify the impact of an alert on a user that owns a resource.
+Active: false                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: BloodHound 
+Query: |
+  MATCH p = (a)-[r:AZOwns|AZUserAccessAdministrator]->(b) 
+  RETURN p  
+Targets:
+  - Name: CSV
+    Enabled: true
+    Path: output/azowners.csv
+  - Name: Sentinel
+    Enabled: false
+    # TODO: Add filtering for output - WIP for now

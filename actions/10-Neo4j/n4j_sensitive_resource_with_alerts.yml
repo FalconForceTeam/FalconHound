@@ -1,0 +1,15 @@
+Name: Sensitive resource with alerts
+ID: N4J_Sensitive_Resource_with_alerts
+Description: Searches for sensitive nodes with alerts
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (n {sensitive:true}) WHERE n.owned = true
+  RETURN {Name: n.name, AlertIds: n.alertid} as info
+Targets:
+  - Name: Sentinel
+    Enabled: true

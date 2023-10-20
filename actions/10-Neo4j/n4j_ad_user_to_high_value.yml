@@ -1,0 +1,22 @@
+Name: AD User to high-value assets
+ID: N4J_AD_User_to_HighValue
+Description: Counts all direct and nested shortest paths to high-value nodes from all users.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (x:Group{highvalue:true})
+  WITH x.objectid as ObjectID, x.name as Name
+  MATCH (y:Group {objectid:ObjectID})
+  MATCH (u:User)
+  WITH Name, COUNT(shortestPath((u)-[:MemberOf]->(y))) as Direct, COUNT(shortestPath((u)-[:MemberOf*1..]->(y))) as Nested, nodes(shortestPath((u)-[:MemberOf]->(y))) as DirectNames,nodes(shortestPath((u)-[:MemberOf*1..]->(y))) as NestedNames
+  RETURN {Name: Name, Direct: Direct, DirectNames: [node in DirectNames | node.name],Nested: Nested, NestedNames: [node in NestedNames | node.name]} as info
+Targets:
+  - Name: CSV
+    Enabled: false
+    Path: output/user_to_highvaluecount.csv
+  - Name: Sentinel
+    Enabled: true  

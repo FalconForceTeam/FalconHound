@@ -1,0 +1,34 @@
+Name: Get all currently active sessions on hosts
+ID: MDE_Update_Active_Sessions
+Description: This query will look for all active sessions in MDE and add them to Neo4j
+Author: FalconForce
+Version: '1.0'
+Info: |
+  This query will look for all active sessions in MDE and add them to the graph.  
+  If there are still sessions in the graph that are older than 4 hours, they will be removed and set to HadSession.
+Active: false                 # Enable to run this action
+Debug: false                 # Enable to see query results in the console
+SourcePlatform: MDE          # Sentinel, Watchlist, Neo4j, CSV, MDE, Graph, Splunk
+Query: |
+    let timeframe = 15m;
+    DeviceInfo
+    | where Timestamp >= ago(timeframe)
+    | extend LoggedOnUsers=parse_json(LoggedOnUsers)
+    | mv-expand LoggedOnUsers
+    | extend UserName=toupper(tostring(LoggedOnUsers.UserName)), AccountSid=toupper(tostring(LoggedOnUsers.Sid))
+    | summarize Timestamp=arg_min(Timestamp,*) by DeviceName, UserName, AccountSid
+Targets:
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH toUpper($DeviceName) as DeviceName, $AccountSid as AccountSid, $Timestamp as Timestamp
+      MATCH (x:Computer {name:DeviceName}) MATCH (y:User {objectid:AccountSid}) MERGE (x)-[r:HasSession]->(y) SET r.since=Timestamp SET r.source='falconhound'
+      WITH DeviceName
+      MATCH (c)-[R:HasSession]->(u)
+      WHERE c.name=DeviceName
+      AND duration.between(datetime(R.since), datetime()).hours > 4
+      MERGE (c)-[r:HadSession]->(u) SET r.till=datetime() SET r.source='falconhound' SET r.reason='timeout' DELETE R
+    Parameters:
+      DeviceName: DeviceName
+      AccountSid: AccountSid
+      Timestamp: Timestamp

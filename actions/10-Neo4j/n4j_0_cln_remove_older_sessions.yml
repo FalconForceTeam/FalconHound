@@ -1,0 +1,14 @@
+Name: CLEANUP - Time-out sessions older than 3 days
+ID: N4J_CLN_Remove_Older_Sessions
+Description: Removes the HasSession relation and replaces it with HadSession if the session is older than 3 days.
+Author: FalconForce
+Version: '0.8'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+    MATCH (c)-[R:HasSession]->(u)
+    WHERE duration.between(datetime(R.since), datetime()).days > 3
+    MERGE (c)-[r:HadSession]->(u) SET r.till=datetime() SET r.source='falconhound' SET r.reason='timeout' DELETE R
+Targets: []

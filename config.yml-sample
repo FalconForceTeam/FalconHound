@@ -1,0 +1,64 @@
+################################################
+# FalconHound Configuration File
+################################################
+# This file contains the configuration for FalconHound
+# Add your API keys here in the proper section
+
+################################################
+# Add your Keyvault information here
+# This is optional, when used, FalconHound will pull the
+# API keys from Keyvault instead of this file
+# start with the -keyvault flag
+################################################
+keyvault:
+  uri: https://XXXXXXXX.vault.azure.net/
+  tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appSecret: xxxxxxxxxxxxxx
+
+################################################
+# Add your Sentinel connection information here
+################################################
+sentinel:
+  workspaceID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  subscriptionID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  resourceGroup: "XXXXXXX"
+  sharedKey: xxxxxxxxxxxxxx
+  targetTable: "FalconHound"
+  tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appSecret: xxxxxxxxxxxxxx
+  workspaceName: "XXXXXXXX"
+
+################################################
+# Add your MDE connection information here
+# This can be the same app as Sentinel 
+# or preferably a different one
+################################################
+MDE:
+  tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appSecret: xxxxxxxxxxxxxx
+
+################################################
+# Add your Neo4j connection information here 
+################################################
+neo4j:
+  uri: bolt://XX.XX.XX.XX:7687
+  password: xxxxxxxxxxxxxx
+  username: neo4j
+
+################################################
+# Add your BloodHound connection information here 
+################################################
+bloodhound:
+  url: http://xxxxx:8080
+  tokenID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  tokenKey: xxxxxxxxxxxxxx==
+
+################################################
+# Add your Splunk connection information here 
+################################################
+splunk:
+  url: https://X.X.X.X:8088/services/collector
+  token: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx

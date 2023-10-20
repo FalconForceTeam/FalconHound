@@ -1,0 +1,31 @@
+Name: All add events to AD groups
+ID: SEN_AD_Group_Additions
+Description: Gets all group additions from the Security logs, including local groups
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                                               # Enable to run this action
+Debug: false                                                 # Enable to see query results in the console
+SourcePlatform: Sentinel                                    # Sentinel, Watchlist, Neo4j, CSV, MDE, Graph, Splunk
+Query: |
+  let timeframe = 15m;
+  let targetEvent = dynamic([4728,4732,4756]); // 4732 Domain Local, 4728 >> Global, 4756 >> Universal
+  SecurityEvent
+  | where ingestion_time() >= ago(timeframe)
+  | where EventID in (targetEvent)
+  | where MemberName != '-'
+  | project TargetAccount, TargetDomainName, TargetSid, GroupSid=MemberSid, Actor=SubjectUserName, TimeGenerated
+Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH $TargetSid AS TargetSid, $GroupSid AS GroupSid, $TimeGenerated AS Timestamp
+      MATCH (u:User) WHERE u.objectid = TargetSid
+      WITH u, GroupSid, Timestamp
+      MATCH (g:Group) WHERE g.objectid = GroupSid
+      MERGE (u)-[r:MemberOf]->(g)
+      SET r.source = 'falconhound', r.added = Timestamp
+    Parameters:
+      TargetSid: TargetSid
+      GroupSid: GroupSid
+      TimeGenerated: TimeGenerated

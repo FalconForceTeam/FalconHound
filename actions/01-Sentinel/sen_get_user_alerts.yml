@@ -1,0 +1,36 @@
+Name: Get Alerts on Accounts
+ID: SEN_Acct_Alerts
+Description: Gets all alerts from Sentinel, checks the status and marks the hosts or users as compromised in Neo4j.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                                                # Enable to run this action
+Debug: false                                                 # Enable to see query results in the console
+SourcePlatform: Sentinel                                    # Sentinel, Watchlist, Neo4j, CSV, MDE, Graph, Splunk
+Query: |
+    let timeframe = 15m;
+    SecurityAlert
+    | where ingestion_time() >= ago(timeframe)
+    | extend EntitiesDynamicArray=parse_json(Entities) | mvexpand EntitiesDynamicArray
+    | extend Entitytype=tostring(parse_json(EntitiesDynamicArray).Type)
+    | where Entitytype=='account'
+    | extend Sid=tostring(parse_json(EntitiesDynamicArray).Sid)
+    | extend EntityName=tostring(parse_json(EntitiesDynamicArray).Name),Domain=tostring(parse_json(EntitiesDynamicArray).NTDomain)
+    | where not(isempty(Sid) or Sid == 'S-1-0-0' or Sid == 'S-1-5-18' or isempty(EntityName))
+    | project AlertId=VendorOriginalId,Entitytype,EntityName,Sid, ProviderName, Status
+    | summarize make_set(AlertId) by Entitytype,EntityName,Status, ProviderName,Sid
+    | mv-expand set_AlertId 
+Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH $set_AlertId AS alertId, toUpper($EntityName) AS entityName, toUpper($Sid) AS sid, $Status AS status
+      MATCH (u)
+      WHERE u.objectid = sid AND (u:User OR u:AZUser)
+      SET u.alertid = (CASE WHEN status = 'New' AND NOT alertId IN coalesce(u.alertid, []) THEN coalesce(u.alertid, []) + [alertId] WHEN status = 'Resolved' THEN [val IN u.alertid WHERE val <> alertId] ELSE u.alertid END), 
+      u.owned = True
+    Parameters:
+      set_AlertId: set_AlertId
+      EntityName: EntityName
+      Sid: Sid
+      Status: Status

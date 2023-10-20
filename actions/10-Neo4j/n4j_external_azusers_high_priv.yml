@@ -1,0 +1,25 @@
+Name: AAD external users with high privileges
+ID: N4J_External_AZUsers_High_Priv
+Description: This action lists all external users with sensitive roles or high privileges.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH p = (n:AZUser)-[r]->(g)
+  WHERE n.name contains "#EXT#" AND NOT(r:AZMemberOf)
+  RETURN {Name:n.name , Count:COUNT(g.name), Role:type(r), RoleAssignments:COLLECT(g.name)}
+Targets:
+  - Name: CSV
+    Enabled: false
+    Path: output/azusers_highprivs.csv
+  - Name: Sentinel
+    Enabled: true
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_Externals_High_Priv
+    DisplayName: FH Externals with High Privs
+    SearchKey: Name
+    Overwrite: true

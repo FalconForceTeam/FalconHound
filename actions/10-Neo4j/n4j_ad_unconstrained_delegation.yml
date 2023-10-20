@@ -1,0 +1,24 @@
+Name: AD Hosts with unconstrained delegation
+ID: N4J_AD_Unconstrained_delegation
+Description: This action lists all computers with unconstrained delegation.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (c:Computer {unconstraineddelegation:true}) 
+  RETURN {Name: c.name, Enabled: c.enabled, HighValue: c.highvalue, Created: c.whencreated}
+Targets:
+  - Name: CSV
+    Enabled: true
+    Path: output/ad_unconstrained_delegation.csv
+  - Name: Sentinel
+    Enabled: false
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_AD_Unconstrained_delegation
+    DisplayName: Unconstrained Delegation
+    SearchKey: Name
+    Overwrite: true 

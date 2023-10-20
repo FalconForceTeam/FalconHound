@@ -1,0 +1,243 @@
+{
+    "type": "object",
+    "properties": {
+        "Active": {
+            "type": "boolean"
+        },
+        "Author": {
+            "type": "string"
+        },
+        "Debug": {
+            "type": "boolean"
+        },
+        "Description": {
+            "type": "string"
+        },
+        "ID": {
+            "type": "string"
+        },
+        "Info": {
+            "type": "string"
+        },
+        "Name": {
+            "type": "string"
+        },
+        "Query": {
+            "type": "string"
+        },
+        "SourcePlatform": {
+            "type": "string",
+            "enum": [
+                "Sentinel",
+                "MDE",
+                "Neo4j",
+                "BloodHound",
+                "MSGraph"
+            ]
+        },
+        "Version": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]+)*$"
+        },
+        "Targets": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "Name": {
+                        "type": "string",
+                        "enum": [
+                            "CSV",
+                            "Neo4j",
+                            "Sentinel",
+                            "Splunk",
+                            "Watchlist",
+                            "BloodHound",
+                            "BHSession"
+                        ]
+                    },
+                    "Enabled": {
+                        "type": "boolean"
+                    }
+                },
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "CSV"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                },
+                                "Path": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "Path"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "Neo4j"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                },
+                                "Query": {
+                                    "type": "string"
+                                },
+                                "Parameters": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "Query"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "Sentinel"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "BHQuery" : {
+                                    "type": "string"
+                                },
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "Splunk"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "BHSession"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                },
+                                "BatchSize": {
+                                    "type": "integer"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "Watchlist"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                },
+                                "WatchlistName": {
+                                    "type": "string"
+                                },
+                                "DisplayName": {
+                                    "type": "string"
+                                },
+                                "SearchKey": {
+                                    "type": "string"
+                                },
+                                "Overwrite": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "WatchlistName",
+                                "DisplayName",
+                                "SearchKey",
+                                "Overwrite"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "required": [
+        "Active",
+        "Author",
+        "Debug",
+        "Description",
+        "ID",
+        "Info",
+        "Name",
+        "Query",
+        "SourcePlatform",
+        "Version",
+        "Targets"
+    ]
+}

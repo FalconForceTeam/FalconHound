@@ -1,0 +1,17 @@
+Name: Long inactive User with a Session on a Computer
+ID: N4J_Long_Inactive_User_with_Session
+Description: Searches for users with a session on a computer that have not been seen in the past 90 days
+Author: FalconForce
+Version: '1.0'
+Info: |
+    Requires SharpHound runs to be run at least once every 90 days to be reliable, since this property is not updated by FalconHound. Preferably more frequent.
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (u:User) WHERE u.lastlogon > (datetime().epochseconds - (90 * 86400)) and NOT u.lastlogon IN [-1.0, 0.0] 
+  MATCH (u)-[r:HasSession]-(c:Computer)
+  RETURN {UserName: u.name, LastLogonSeen: u.lastlogon, UserHasAlerts: u.owned, LoggedOnComputer: c.name}
+Targets:
+  - Name: Sentinel
+    Enabled: true

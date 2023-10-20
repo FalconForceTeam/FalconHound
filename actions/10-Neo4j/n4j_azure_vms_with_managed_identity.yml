@@ -1,0 +1,21 @@
+Name: Azure VMs with a Managed Identity
+ID: N4J_Azure_VM_Managed_Identity
+Description: This action lists VMs with an assigned Managed Identity.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (c:AZVM)-[r:AZManagedIdentity]->(n) 
+  RETURN {Name:c.name , Count:COUNT(n.name), Role:type(r), Identities:COLLECT(n.name)}
+Targets:
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_AZ_VM_Managed_Identity
+    DisplayName: VMs with Managed Identity
+    SearchKey: Name
+    Overwrite: true 
+  - Name: Sentinel
+    Enabled: true

@@ -1,0 +1,24 @@
+Name: AD Kerberoastable Users
+ID: N4J_AD_Kerberoastable_Users
+Description: This action lists all Kerberoastable users.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (n:User) WHERE n.hasspn=true 
+  RETURN {Name: n.name, LastPasswordSet: n.pwdlastset, HighValue: n.highvalue, Sensitive: n.sensitive }
+Targets:
+  - Name: CSV
+    Enabled: true
+    Path: output/ad_kerberoastable_users.csv
+  - Name: Sentinel
+    Enabled: false
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_Kerberoastable_Users
+    DisplayName: Kerberoastable Users
+    SearchKey: Name
+    Overwrite: true

@@ -1,0 +1,22 @@
+Name: AD user with session on a machine with their user and their admin account
+ID: N4J_User_Session_with_Additional_Admin_Session
+Description: Looks for all users that also have a session with their admin account. By default, this is the same username prepended by "ADM".
+Author: FalconForce
+Version: '1.0'
+Info: |
+  Change the prepend "ADM" to match your naming convention.
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (u:User)-[:HAS_SESSION]->(s1:Session)-[:ON_MACHINE]->(m:Computer)
+  WITH u, s1, m
+  MATCH (m)-[:HAS_SESSION]->(s2:Session)
+  WHERE s2.username = "ADM" + s1.username   
+  RETURN {Name: u.name, Computer: m.name, AdminName: s2.name}
+Targets:
+  - Name: CSV
+    Enabled: false
+    Path: output/user_witn_additional_admin_session.csv
+  - Name: Sentinel
+    Enabled: true

@@ -1,0 +1,30 @@
+Name: N4J Domain Controllers
+ID: N4J_DomainControllers
+Description: This action lists BloodHound domain controllers and pushes list of names/SIDs to Sentinel watchlist.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (y:Group) WHERE y.objectid ENDS WITH '-516' MATCH p=shortestPath((x)-[:MemberOf*1..]->(y)) WHERE x<>y
+  RETURN {
+  Type:Labels(x)[0],
+  Name:x.name,
+  ObjectID:x.objectid,
+  Distance:LENGTH(p),
+  Parent:(NODES(p))[1].name
+  }
+Targets:
+  - Name: CSV
+    Enabled: true
+    Path: output/domain_controllers.csv
+  - Name: Sentinel
+    Enabled: true
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_DomainControllers
+    DisplayName: AD Domain Controllers
+    SearchKey: Name
+    Overwrite: true

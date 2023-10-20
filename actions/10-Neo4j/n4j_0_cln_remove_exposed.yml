@@ -1,0 +1,14 @@
+Name: CLEANUP - Remove exposed attribute after 14 days
+ID: N4J_CLN_Remove_Old_Exposed
+Description: Removes the Exposed flags if the exposedSince is older than 14 days.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+    MATCH (c {exposed:true})
+    WHERE duration.between(datetime(c.exposedSince), datetime()).days > 14
+    REMOVE c.exposed, c.ports, c.exposedSince
+Targets: []
