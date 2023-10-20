@@ -1,4 +1,4 @@
-[![license](https://img.shields.io/github/license/FalconForceTeam/FalconHound.svg?style=flat-square)](https://github.com/FalconForceTeam/FalconHound/blob/main/LICENSE)
+
 ![Maintenance](https://img.shields.io/maintenance/yes/2023.svg?style=flat-square)
 [![Twitter](https://img.shields.io/twitter/follow/falconforceteam.svg?style=social&label=Follow)](https://twitter.com/falconforceteam)
 [![Discord Shield](https://discordapp.com/api/guilds/715302469751668787/widget.png?style=shield)](https://discord.gg/CBTvTkb4)
