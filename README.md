@@ -49,6 +49,7 @@ Currently, FalconHound supports the following data sources and or targets:
 - Splunk
 - Microsoft Defender for Endpoint
 - Neo4j
+- MS Graph API (early stage)
 - CSV files
 
 Additional data sources and targets are planned for the future.
@@ -60,7 +61,7 @@ At this moment, FalconHound only supports the Neo4j database for BloodHound. Sup
 ## Installation
 
 Since FalconHound is written in Go, there is no installation required. Just download the binary from the release section and run it.
-There are compiled binaries available for Windows, Linux and MacOS. You can find them in the releases section.
+There are compiled binaries available for Windows, Linux and MacOS. You can find them in the [releases](https://github.com/FalconForceTeam/FalconHound/releases) section.
 
 Before you can run it, you need to create a config file. You can find an example config file in the root folder.
 
