@@ -8,7 +8,7 @@ Active: true                                               # Enable to run this 
 Debug: false                                                 # Enable to see query results in the console
 SourcePlatform: Sentinel                                    # Sentinel, Watchlist, Neo4j, CSV, MDE, Graph, Splunk
 Query: |
-  let timeframe = 7d;
+  let timeframe = 15m;
   SecurityEvent
   | where EventID == 4732
   | where TargetSid == "S-1-5-32-544"
