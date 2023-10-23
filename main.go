@@ -63,6 +63,9 @@ func main() {
 	var ids string
 	flag.StringVar(&ids, "ids", "", "comma separated list of action IDs to run")
 
+	var debug bool
+	flag.BoolVar((&debug), "debug", false, "Enable debug mode, for all executed actions")
+
 	var actionlistFlag bool
 	flag.BoolVar(&actionlistFlag, "actionlist", false, "Get a list of all enabled actions, use in combination with -go")
 
@@ -81,7 +84,7 @@ func main() {
 			// split ids on comma
 			actionIdFilters = append(actionIdFilters, strings.Split(ids, ",")...)
 		}
-		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag)
+		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug)
 	} else {
 		printHelp()
 		os.Exit(0)
@@ -258,7 +261,7 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 	}
 }
 
-func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool) {
+func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool, debug bool) {
 	// create error log
 	fileError, err := openLogFile("./error.log")
 	if err != nil {
@@ -359,6 +362,9 @@ func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilter
 
 	for _, query := range queries {
 		outputs := make([]output_processor.OutputProcessorInterface, 0)
+		if debug {
+			query.Debug = true
+		}
 		for _, target := range query.Targets {
 			output, err := makeOutputProcessor(target, query, globalCreds)
 			if err != nil {
