@@ -63,6 +63,6 @@ GraphAPI
 - [ ] Add env variable to creds options
 - [ ] Add managed identity option
 - [ ] Excel sheet reports
-- [ ] Configurable time window for actions
+- [x] Configurable time window for actions
 - [ ] Write to Teams
 - [ ] Write to Slack
