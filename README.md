@@ -64,7 +64,7 @@ There are compiled binaries available for Windows, Linux and MacOS. You can find
 
 Before you can run it, you need to create a config file. You can find an example config file in the root folder. Instructions on how to creat all crededentials can be found [here](docs/required_permissions.md).
 
-The recommened way to run FalconHound is to run it as a scheduled task or cron job. This will allow you to run it on a regular basis and keep your graph, alerts and enrichments up-to-date.
+The recommended way to run FalconHound is to run it as a scheduled task or cron job. This will allow you to run it on a regular basis and keep your graph, alerts and enrichments up-to-date.
 
 ### Requirements
 
