@@ -164,15 +164,6 @@ func QuerySplunk(query string, credentials internal.Credentials) (string, error)
 		log.Fatalln(err)
 	}
 
-	// log.Println("JSON Response:\n", string(bodyBytes))
-
-	// var results map[string]interface{}
-	// err = json.Unmarshal(bodyBytes, &results)
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-
-	// log.Println("RESULTS:\n", results)
 	return string(bodyBytes), nil
 
 }
