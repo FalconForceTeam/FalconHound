@@ -47,8 +47,6 @@ GraphAPI
 - [ ] Read watchlists
 - [x] Save watchlists
 
-- [ ] Read from Splunk
-
 ## Operational
 
 - [ ] Token needs to be used more efficiently
