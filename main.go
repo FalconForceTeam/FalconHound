@@ -259,6 +259,11 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 			InputProcessor: &baseProcessor,
 			Config:         input_processor.MSGraphConfig{},
 		}, nil
+	case "Splunk":
+		return &input_processor.SplunkProcessor{
+			InputProcessor: &baseProcessor,
+			Config:         input_processor.SplunkConfig{},
+		}, nil
 	default:
 		return nil, fmt.Errorf("source platform %q not supported", query.SourcePlatform)
 	}

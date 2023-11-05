@@ -32,7 +32,8 @@
                 "MDE",
                 "Neo4j",
                 "BloodHound",
-                "MSGraph"
+                "MSGraph",
+                "Splunk"
             ]
         },
         "Version": {
