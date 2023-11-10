@@ -28,6 +28,8 @@ Other examples where FalconHound can be used:
 
 The possibilities are endless here. Please add more ideas to the issue tracker or submit a PR.
 
+A blog detailing more on why we developed it and some use case examples can be found [here](https://medium.com/falconforce/falconhound-attack-path-management-for-blue-teams-42adedc9cae5?source=friends_link&sk=9f64b6b3028c5a2a6087d63b4fd2c82f)
+
 Index:
 - [Supported data sources and targets](#supported-data-sources-and-targets)
 - [Installation](#installation)
