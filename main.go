@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"falconhound/cmd"
 	"falconhound/input_processor"
@@ -72,6 +73,9 @@ func main() {
 	var actionlistFlag bool
 	flag.BoolVar(&actionlistFlag, "actionlist", false, "Get a list of all enabled actions, use in combination with -go")
 
+	var cachedbFlag bool
+	flag.BoolVar(&cachedbFlag, "cachedb", false, "Update the cache database")
+
 	flag.Parse()
 
 	if helpFlag {
@@ -88,6 +92,12 @@ func main() {
 			actionIdFilters = append(actionIdFilters, strings.Split(ids, ",")...)
 		}
 		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug, lookback)
+	} else if cachedbFlag {
+		cacheDb()
+		// globalCreds := cmd.GetCreds(configFile, keyvaultFlag)
+		// UserResults, _ := input_processor.GetBHUsers(globalCreds)
+		// fmt.Println(UserResults)
+		bhCacheUpdate()
 	} else {
 		printHelp()
 		os.Exit(0)
@@ -456,4 +466,48 @@ func openLogFile(path string) (*os.File, error) {
 		return nil, err
 	}
 	return logFile, nil
+}
+
+func cacheDb() {
+	err := internal.CheckAndCreateDB("cache.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	cachedb, _ := internal.OpenDB("cache.db")
+	userCount, computerCount, _ := internal.GetCacheCount(cachedb)
+	log.Printf("Cache contains %d users and %d computers", userCount, computerCount)
+	// internal.ClearUserCache(cachedb)
+	internal.SetUserCache(cachedb, "13121-1212121-1212-1212-6542-12123212", "willem@sloeber.nl")
+	// query, _ := internal.GetCachedUserByName(cachedb, "olafhartong")
+	// log.Println("User found, objectid =", query)
+	internal.CloseDB(cachedb)
+}
+
+type BHobjects struct {
+	Name     string `json:"name"`
+	ObjectId string `json:"objectId"`
+}
+
+func bhCacheUpdate() {
+	globalCreds := cmd.GetCreds("configs/config.yml", false)
+	cachedb, _ := internal.OpenDB("cache.db")
+	UserResults, _ := input_processor.GetBHCacheData(globalCreds, "User")
+	var users []BHobjects
+	err := json.Unmarshal([]byte(UserResults), &users)
+	if err != nil {
+		panic(err)
+	}
+	for _, user := range users {
+		internal.SetUserCache(cachedb, user.ObjectId, user.Name)
+	}
+	ComputerResults, _ := input_processor.GetBHCacheData(globalCreds, "Computer")
+	var computers []BHobjects
+	err = json.Unmarshal([]byte(ComputerResults), &computers)
+	if err != nil {
+		panic(err)
+	}
+	for _, user := range computers {
+		internal.SetComputerCache(cachedb, user.ObjectId, user.Name)
+	}
+	// fmt.Println(UserResults)
 }
