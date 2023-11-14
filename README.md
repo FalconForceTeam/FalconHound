@@ -309,8 +309,12 @@ Neo4jPassword
 GraphTenantID
 GraphAppID
 GraphAppSecret
-SplunkUri
-SplunkToken
+SplunkUrl
+SplunkApiToken
+SplunkIndex
+SplunkApiPort
+SplunkHecToken
+SplunkHecPort
 ```
 
 Once configured you can add the `-keyvault` parameter while starting FalconHound.

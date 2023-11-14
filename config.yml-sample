@@ -60,5 +60,9 @@ bloodhound:
 # Add your Splunk connection information here 
 ################################################
 splunk:
-  url: https://X.X.X.X:8088/services/collector
-  token: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  url: https://10.10.2.140
+  index: wineventlog
+  hecport: 8088
+  hectoken: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  apiport: 8089
+  apitoken:

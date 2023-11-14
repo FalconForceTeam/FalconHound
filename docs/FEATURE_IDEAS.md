@@ -47,12 +47,10 @@ GraphAPI
 - [ ] Read watchlists
 - [x] Save watchlists
 
-- [ ] Read from Splunk
-
 ## Operational
 
 - [ ] Token needs to be used more efficiently
-- [ ] Add global debug mode
+- [x] Add global debug mode
 - [ ] Add check that if a credential is empty in the config the in/out processor is not used
 
 - [ ] Add more logging
@@ -63,6 +61,6 @@ GraphAPI
 - [ ] Add env variable to creds options
 - [ ] Add managed identity option
 - [ ] Excel sheet reports
-- [ ] Configurable time window for actions
+- [x] Configurable time window for actions
 - [ ] Write to Teams
 - [ ] Write to Slack

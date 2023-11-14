@@ -34,15 +34,15 @@ func PostToSplunk(queryResults internal.QueryResults, creds internal.Credentials
 	if err != nil {
 		return err
 	}
-
+	url := fmt.Sprintf("%s:%s/services/collector/event", creds.SplunkUrl, creds.SplunkHecPort)
 	// Create HTTP request
-	req, err := http.NewRequest("POST", creds.SplunkUri, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}
 
 	// Set headers
-	req.Header.Set("Authorization", fmt.Sprintf("Splunk %s", creds.SplunkToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Splunk %s", creds.SplunkHecToken))
 	req.Header.Set("Content-Type", "application/json")
 
 	// Create HTTP client with custom transport to disable SSL verification

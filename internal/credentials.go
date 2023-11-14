@@ -21,8 +21,12 @@ type Credentials struct {
 	Neo4jUri               string `config:"neo4j.uri"`
 	Neo4jUsername          string `config:"neo4j.username"`
 	Neo4jPassword          string `config:"neo4j.password"`
-	SplunkUri              string `config:"splunk.url"` // TODO inconsistent one is called uri the other url
-	SplunkToken            string `config:"splunk.token"`
+	SplunkUrl              string `config:"splunk.url"`
+	SplunkIndex            string `config:"splunk.index"`
+	SplunkApiPort          string `config:"splunk.apiport"`
+	SplunkApiToken         string `config:"splunk.apitoken"`
+	SplunkHecPort          string `config:"splunk.hecport"`
+	SplunkHecToken         string `config:"splunk.hectoken"`
 	BHUrl                  string `config:"bloodhound.url"`
 	BHTokenID              string `config:"bloodhound.tokenID"`
 	BHTokenKey             string `config:"bloodhound.tokenKey"`

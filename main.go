@@ -63,6 +63,12 @@ func main() {
 	var ids string
 	flag.StringVar(&ids, "ids", "", "comma separated list of action IDs to run")
 
+	var debug bool
+	flag.BoolVar((&debug), "debug", false, "Enable debug mode, for all executed actions")
+
+	var lookback string
+	flag.StringVar(&lookback, "lookback", "", "Override the timeframe in the queries, use the KQL supported format (1d,1h,15m,etc)")
+
 	var actionlistFlag bool
 	flag.BoolVar(&actionlistFlag, "actionlist", false, "Get a list of all enabled actions, use in combination with -go")
 
@@ -81,7 +87,7 @@ func main() {
 			// split ids on comma
 			actionIdFilters = append(actionIdFilters, strings.Split(ids, ",")...)
 		}
-		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag)
+		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug, lookback)
 	} else {
 		printHelp()
 		os.Exit(0)
@@ -253,12 +259,17 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 			InputProcessor: &baseProcessor,
 			Config:         input_processor.MSGraphConfig{},
 		}, nil
+	case "Splunk":
+		return &input_processor.SplunkProcessor{
+			InputProcessor: &baseProcessor,
+			Config:         input_processor.SplunkConfig{},
+		}, nil
 	default:
 		return nil, fmt.Errorf("source platform %q not supported", query.SourcePlatform)
 	}
 }
 
-func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool) {
+func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool, debug bool, lookback string) {
 	// create error log
 	fileError, err := openLogFile("./error.log")
 	if err != nil {
@@ -359,6 +370,16 @@ func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilter
 
 	for _, query := range queries {
 		outputs := make([]output_processor.OutputProcessorInterface, 0)
+		if debug {
+			query.Debug = true
+		}
+
+		// if lookback is set, override the query 'let timeframe = 15m;' with new variable
+		if lookback != "" {
+			query.Query = strings.ReplaceAll(query.Query, "let timeframe = 15m;", fmt.Sprintf("let timeframe = %s;", lookback))
+			logInfo("[i] Overriding timeframe to %s for all active queries", lookback)
+		}
+
 		for _, target := range query.Targets {
 			output, err := makeOutputProcessor(target, query, globalCreds)
 			if err != nil {
