@@ -42,7 +42,7 @@ type SplunkProcessor struct {
 }
 
 func (m *SplunkProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	results, err := QuerySplunk(m.Query, m.Credentials)
+	results, err := QuerySplunk(m.Query, m.Credentials, m.Debug)
 	if err != nil {
 		if strings.Contains(err.Error(), "unexpected HTTP status code: 400") {
 			return internal.QueryResults{}, fmt.Errorf("failed to run query %q. Most likely there is a syntax error in the query", m.Query)
@@ -64,7 +64,7 @@ func (m *SplunkProcessor) ExecuteQuery() (internal.QueryResults, error) {
 	return queryResults, nil
 }
 
-func QuerySplunk(query string, credentials internal.Credentials) (string, error) {
+func QuerySplunk(query string, credentials internal.Credentials, debug bool) (string, error) {
 	baseURL := credentials.SplunkUrl + ":" + credentials.SplunkApiPort
 	authHeader := "Bearer " + credentials.SplunkApiToken
 
@@ -137,11 +137,15 @@ func QuerySplunk(query string, credentials internal.Credentials) (string, error)
 		}
 
 		if jobStatusResponse.Entry[0].Content.IsDone {
-			log.Printf("Job %s completed, getting data\n", sid)
+			if debug {
+				log.Printf("[i] Job %s completed, getting data\n", sid)
+			}
 			break
 		}
 
-		log.Printf("Job %s still running, waiting 1 second\n", sid)
+		if debug {
+			log.Printf("[»] Job %s still running, waiting 1 second\n", sid)
+		}
 		time.Sleep(1 * time.Second)
 	}
 
