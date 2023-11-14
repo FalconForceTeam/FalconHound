@@ -1,0 +1,14 @@
+*.exe
+*.exe~
+*.out
+.DS_Store
+*.log
+output/*.csv
+bin/*
+configs/*
+.vscode/*
+actionsTEST/*
+falconhound
+dist/*
+.goreleaser.yaml
+cache.db
