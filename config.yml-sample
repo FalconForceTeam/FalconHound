@@ -66,3 +66,11 @@ splunk:
   hectoken: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   apiport: 8089
   apitoken:
+
+################################################
+# Add your LogScale / Humio connection information here 
+################################################
+logscale:
+  url: https://cloud.community.humio.com
+  token: 
+  repository: 

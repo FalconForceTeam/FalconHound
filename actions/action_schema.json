@@ -33,7 +33,8 @@
                 "Neo4j",
                 "BloodHound",
                 "MSGraph",
-                "Splunk"
+                "Splunk",
+                "LogScale"
             ]
         },
         "Version": {

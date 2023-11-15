@@ -264,6 +264,11 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 			InputProcessor: &baseProcessor,
 			Config:         input_processor.SplunkConfig{},
 		}, nil
+	case "LogScale":
+		return &input_processor.LogScaleProcessor{
+			InputProcessor: &baseProcessor,
+			Config:         input_processor.LogScaleConfig{},
+		}, nil
 	default:
 		return nil, fmt.Errorf("source platform %q not supported", query.SourcePlatform)
 	}
