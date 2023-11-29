@@ -14,18 +14,18 @@ Query: |
   | where ingestion_time() >= ago(timeframe)
   | where EventID in (targetEvent)
   | where MemberName != '-'
-  | project TargetAccount, TargetDomainName, TargetSid, GroupSid=MemberSid, Actor=SubjectUserName, TimeGenerated
+  | project TargetAccount, TargetDomainName, GroupSid=TargetSid, MemberSid, Actor=SubjectUserName, TimeGenerated
 Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
   - Name: Neo4j
     Enabled: true
     Query: |
-      WITH $TargetSid AS TargetSid, $GroupSid AS GroupSid, $TimeGenerated AS Timestamp
-      MATCH (u:User) WHERE u.objectid = TargetSid
+      WITH $MemberSid AS MemberSid, $GroupSid AS GroupSid, $TimeGenerated AS Timestamp
+      MATCH (u:User) WHERE u.objectid = MemberSid
       WITH u, GroupSid, Timestamp
       MATCH (g:Group) WHERE g.objectid = GroupSid
       MERGE (u)-[r:MemberOf]->(g)
       SET r.source = 'falconhound', r.added = Timestamp
     Parameters:
-      TargetSid: TargetSid
+      MemberSid: MemberSid
       GroupSid: GroupSid
       TimeGenerated: TimeGenerated
