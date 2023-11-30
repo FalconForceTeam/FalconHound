@@ -16,7 +16,7 @@ Query: |
   RETURN {Name: Name, Direct: Direct, DirectNames: [node in DirectNames | node.name],Nested: Nested, NestedNames: [node in NestedNames | node.name]} as info
 Targets:
   - Name: CSV
-    Enabled: true
+    Enabled: false
     Path: output/azuser_to_highvaluecount.csv
   - Name: Sentinel
     BHQuery: |

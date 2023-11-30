@@ -15,11 +15,11 @@ Query: |
   [b in NODES(p)|LABELS(b)[0]] as labl,
   [c IN RELATIONSHIPS(p)|TYPE(c)] as rels
   WHERE hops > 1
-  RETURN {Hops:hops, Nodes:nod, Labels:labl, EdgeTypes:rels}  
+  RETURN {Hops:hops, Nodes:nod, Labels:labl, EdgeTypes:rels}
   LIMIT 25
 Targets:
   - Name: CSV
-    Enabled: true
+    Enabled: false
     Path: output/user_to_da_paths.csv
   - Name: Sentinel
     Enabled: true

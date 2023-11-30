@@ -12,7 +12,7 @@ Query: |
   RETURN {Name: c.name, Enabled: c.enabled, HighValue: c.highvalue, Created: c.whencreated}
 Targets:
   - Name: CSV
-    Enabled: true
+    Enabled: false
     Path: output/ad_unconstrained_delegation.csv
   - Name: Sentinel
     Enabled: false

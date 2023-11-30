@@ -18,7 +18,7 @@ Query: |
   }
 Targets:
   - Name: CSV
-    Enabled: true
+    Enabled: false
     Path: output/domain_controllers.csv
   - Name: Sentinel
     Enabled: true

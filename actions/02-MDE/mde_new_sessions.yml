@@ -16,10 +16,10 @@ Query: |
     | where ingestion_time() >= ago(timeframe)
     | where ActionType == "LogonSuccess" and Protocol != "Negotiate"
     | where LogonType !in ("Network","Service")
-    | where isnotempty(AccountSid) 
+    | where isnotempty(AccountSid)
     | where not(AccountSid matches regex excludeSid)
     | extend ComputerName = toupper(DeviceName), DomainName = strcat(tostring(split(DeviceName, '.')[-2]), '.', tostring(split(DeviceName, '.')[-1]))
-    | summarize Timestamp=min(Timestamp) by DeviceName=ComputerName,AccountSid,AccountName,AccountDomain, LogonType
+    | summarize Timestamp=min(Timestamp) by DeviceName,AccountSid,AccountName,AccountDomain, LogonType
 # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
 Targets:
   - Name: Neo4j
