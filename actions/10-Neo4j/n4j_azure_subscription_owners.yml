@@ -12,7 +12,7 @@ Query: |
   RETURN {Name:g.name , Count:COUNT(g.name), Role:type(r), Owners:COLLECT(n.name)}
 Targets:
   - Name: CSV
-    Enabled: true
+    Enabled: false
     Path: output/azusers_subscription_owners.csv
   - Name: Sentinel
     Enabled: true

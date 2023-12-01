@@ -12,7 +12,7 @@ Query: |
   WITH  x.objectid as ObjectID, x.name as Name
   MATCH (y:Group {objectid:ObjectID})
   MATCH (u:Computer {exposed:true})
-  WITH Name, COUNT(shortestPath((u)-[:MemberOf]->(y))) as Direct, COUNT(shortestPath((u)-[:MemberOf*1..]->(y))) as Nested, nodes(shortestPath((u)-[:MemberOf]->(y))) as DirectNames, nodes(shortestPath((u)-[:MemberOf*1..]->(y))) as NestedNames
+  WITH Name, COUNT(shortestPath((u)-[]->(y))) as Direct, COUNT(shortestPath((u)-[*1..]->(y))) as Nested, nodes(shortestPath((u)-[]->(y))) as DirectNames, nodes(shortestPath((u)-[*1..]->(y))) as NestedNames
   WHERE Nested <> 0 and Direct <> 0
   RETURN {Name: Name, Direct: Direct, DirectNames: [node in DirectNames | node.name],Nested: Nested, NestedNames: [node in NestedNames | node.name]} as info
 Targets:
@@ -20,10 +20,12 @@ Targets:
     Enabled: false
     Path: output/exposed_to_highvaluecount.csv
   - Name: Sentinel
+    BHQuery: |
+      MATCH a=shortestPath((c:Computer {exposed:true})-[*..]->({highvalue:TRUE})) RETURN a
     Enabled: true
   - Name: Watchlist
     Enabled: true
     WatchlistName: FH_Exposed_Device_to_HighValue
     DisplayName: Exposed Device to HighValue
     SearchKey: Name
-    Overwrite: true  
+    Overwrite: true

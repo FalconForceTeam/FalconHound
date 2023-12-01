@@ -13,7 +13,7 @@ Query: |
   RETURN {Name:a.name , Count:COUNT(b.name), Role:type(r), Resources:COLLECT(b.name)}
 Targets:
   - Name: CSV
-    Enabled: true
+    Enabled: false
     Path: output/azowners.csv
   - Name: Sentinel
     Enabled: false

@@ -12,7 +12,7 @@ Query: |
   RETURN {Name: n.name, LastPasswordSet: n.pwdlastset, HighValue: n.highvalue, Sensitive: n.sensitive }
 Targets:
   - Name: CSV
-    Enabled: true
+    Enabled: false
     Path: output/ad_kerberoastable_users.csv
   - Name: Sentinel
     Enabled: false
