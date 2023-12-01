@@ -64,13 +64,16 @@ func main() {
 	flag.StringVar(&ids, "ids", "", "comma separated list of action IDs to run")
 
 	var debug bool
-	flag.BoolVar((&debug), "debug", false, "Enable debug mode, for all executed actions")
+	flag.BoolVar(&debug, "debug", false, "Enable debug mode, for all executed actions")
 
 	var lookback string
 	flag.StringVar(&lookback, "lookback", "", "Override the timeframe in the queries, use the KQL supported format (1d,1h,15m,etc)")
 
 	var actionlistFlag bool
 	flag.BoolVar(&actionlistFlag, "actionlist", false, "Get a list of all enabled actions, use in combination with -go")
+
+	var skipinput string
+	flag.StringVar(&skipinput, "skip", "", "Skip the input processor for the specified source platform, comma separated list of platforms")
 
 	flag.Parse()
 
@@ -87,7 +90,7 @@ func main() {
 			// split ids on comma
 			actionIdFilters = append(actionIdFilters, strings.Split(ids, ",")...)
 		}
-		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug, lookback)
+		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug, lookback, skipinput)
 	} else {
 		printHelp()
 		os.Exit(0)
@@ -274,7 +277,7 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 	}
 }
 
-func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool, debug bool, lookback string) {
+func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool, debug bool, lookback string, skipinput string) {
 	// create error log
 	fileError, err := openLogFile("./error.log")
 	if err != nil {
@@ -331,6 +334,17 @@ func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilter
 				logError(errorLog, "failed to validate YAML in file %s: %v", filePath, err)
 				continue
 			}
+
+			// Skip creation of input processors for the specified source platforms
+			skipinput := strings.Split(skipinput, ",")
+			for _, platform := range skipinput {
+				if strings.EqualFold(strings.TrimSpace(platform), strings.TrimSpace(q.SourcePlatform)) {
+					logInfo("[i] Skipping input processor for %s", q.SourcePlatform)
+					//set enabled to false so the query is not run
+					q.Active = false
+				}
+			}
+
 			//count the active queries
 			if !q.Active {
 				continue
