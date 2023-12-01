@@ -12,3 +12,4 @@ falconhound
 dist/*
 .goreleaser.yaml
 cache.db
+.idea/*
