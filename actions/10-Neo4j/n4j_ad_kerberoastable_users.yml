@@ -9,7 +9,7 @@ Debug: false                   # Enable to see query results in the console
 SourcePlatform: Neo4j 
 Query: |
   MATCH (n:User) WHERE n.hasspn=true 
-  RETURN {Name: n.name, LastPasswordSet: n.pwdlastset, HighValue: n.highvalue, Sensitive: n.sensitive }
+  RETURN {Name: n.name, LastPasswordSet: n.pwdlastset, HighValue: n.highvalue, Sensitive: n.sensitive, Sid: n.objectid }
 Targets:
   - Name: CSV
     Enabled: false
