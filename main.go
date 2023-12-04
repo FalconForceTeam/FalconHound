@@ -31,6 +31,7 @@ type Target struct {
 	SearchKey     string            `yaml:"SearchKey,omitempty"`
 	BHQuery       string            `yaml:"BHQuery,omitempty"`
 	BatchSize     int               `yaml:"BatchSize,omitempty"`
+	Table         string            `yaml:"Table,omitempty"`
 }
 
 type Query struct {
@@ -75,6 +76,9 @@ func main() {
 	var skipinput string
 	flag.StringVar(&skipinput, "skip", "", "Skip the input processor for the specified source platform, comma separated list of platforms")
 
+	var adxinitFlag bool
+	flag.BoolVar(&adxinitFlag, "adxinit", false, "Initialize the Azure Dara Explorer table (requires database admin permissions) and -go")
+
 	flag.Parse()
 
 	if helpFlag {
@@ -90,7 +94,7 @@ func main() {
 			// split ids on comma
 			actionIdFilters = append(actionIdFilters, strings.Split(ids, ",")...)
 		}
-		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug, lookback, skipinput)
+		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug, lookback, skipinput, adxinitFlag)
 	} else {
 		printHelp()
 		os.Exit(0)
@@ -190,6 +194,17 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				BHQuery:          target.BHQuery,
 			},
 		}, nil
+	case "ADX":
+		return &output_processor.ADXOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.ADXOutputConfig{
+				QueryName:        query.Name,
+				QueryDescription: query.Description,
+				QueryEventID:     query.ID,
+				BHQuery:          target.BHQuery,
+				Table:            target.Table,
+			},
+		}, nil
 	case "Splunk":
 		return &output_processor.SplunkOutputProcessor{
 			OutputProcessor: &baseOutput,
@@ -277,7 +292,7 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 	}
 }
 
-func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool, debug bool, lookback string, skipinput string) {
+func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool, debug bool, lookback string, skipinput string, adxinitflag bool) {
 	// create error log
 	fileError, err := openLogFile("./error.log")
 	if err != nil {
@@ -383,7 +398,11 @@ func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilter
 
 	globalCreds := cmd.GetCreds(configFile, keyvaultFlag)
 
-	// output_processor.BHSubmit("test", globalCreds)
+	if adxinitflag {
+		logInfo("[i] Adding the FalconHound table to Azure Data Explorer")
+		cmd.AdxInitTable(globalCreds)
+		return
+	}
 
 	var inputProcessors []input_processor.InputProcessorInterface = make([]input_processor.InputProcessorInterface, 0)
 
