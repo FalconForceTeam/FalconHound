@@ -210,6 +210,16 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 			OutputProcessor: &baseOutput,
 			Config:          output_processor.SplunkOutputConfig{},
 		}, nil
+	case "LimaCharlie":
+		return &output_processor.LimaCharlieOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.LimaCharlieOutputConfig{
+				QueryName:        query.Name,
+				QueryDescription: query.Description,
+				QueryEventID:     query.ID,
+				BHQuery:          target.BHQuery,
+			},
+		}, nil
 	case "Neo4j":
 		return &output_processor.Neo4jOutputProcessor{
 			OutputProcessor: &baseOutput,

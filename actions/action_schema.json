@@ -57,7 +57,8 @@
                             "BloodHound",
                             "BHSession",
                             "LogScale",
-                            "ADX"
+                            "ADX",
+                            "LimaCharlie"
                         ]
                     },
                     "Enabled": {

@@ -38,4 +38,7 @@ type Credentials struct {
 	LogScaleUrl            string `config:"logscale.url"`
 	LogScaleToken          string `config:"logscale.token"`
 	LogScaleRepository     string `config:"logscale.repository"`
+	LimaCharlieAPIUrl      string `config:"limacharlie.apiurl"`
+	LimaCharlieOrgId       string `config:"limacharlie.orgid"`
+	LimaCharlieIngestKey   string `config:"limacharlie.ingestkey"`
 }
