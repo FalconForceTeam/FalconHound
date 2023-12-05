@@ -13,7 +13,7 @@ Query: |
   MATCH (y:Group {objectid:ObjectID})
   MATCH (u:Computer {exposed:true})
   WITH Name, COUNT(shortestPath((u)-[]->(y))) as Direct, COUNT(shortestPath((u)-[*1..]->(y))) as Nested, nodes(shortestPath((u)-[]->(y))) as DirectNames, nodes(shortestPath((u)-[*1..]->(y))) as NestedNames
-  WHERE Nested <> 0 and Direct <> 0
+  WHERE Nested <> 0 or Direct <> 0
   RETURN {Name: Name, Direct: Direct, DirectNames: [node in DirectNames | node.name],Nested: Nested, NestedNames: [node in NestedNames | node.name]} as info
 Targets:
   - Name: CSV
