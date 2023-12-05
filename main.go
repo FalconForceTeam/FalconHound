@@ -77,7 +77,7 @@ func main() {
 	flag.StringVar(&skipinput, "skip", "", "Skip the input processor for the specified source platform, comma separated list of platforms")
 
 	var adxinitFlag bool
-	flag.BoolVar(&adxinitFlag, "adxinit", false, "Initialize the Azure Dara Explorer table (requires database admin permissions) and -go")
+	flag.BoolVar(&adxinitFlag, "adxinit", false, "Initialize the Azure Data Explorer table (requires database admin permissions) and -go")
 
 	flag.Parse()
 
