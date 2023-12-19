@@ -29,14 +29,14 @@ Sensitive resource list processor
 
 BH(E) API - under development
 - [ ] Read from new BH(E) API > TODO: wait for query over API to be fixed/improved
-- [-] Query new BH(E) API, parse results
+- [ ] Query new BH(E) API, parse results
 - [ ] Write to new BH(E) API  > TODO: solve the objectid issue
 
 Generic output processors
 - [ ] Write BH compatible JSON outputs
 - [ ] Write markdown outputs
 - [ ] Write to storage account
-- [ ] Write to ADX
+- [x] Write to ADX
 
 GraphAPI
 - [ ] Look into Defender, AAD, Intune, CA policies, ?

@@ -66,3 +66,23 @@ splunk:
   hectoken: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   apiport: 8089
   apitoken:
+
+################################################
+# Add your LogScale / Humio connection information here 
+################################################
+logscale:
+  url: https://cloud.community.humio.com
+  token: 
+  repository:
+
+################################################
+# Add your Azure Data Explorer connection information here
+# This can be the same app as Sentinel or a different one
+################################################
+adx:
+  clusterUrl: https://xxx.westeurope.kusto.windows.net
+  database: enrichments
+  table: FalconHound
+  tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appSecret: xxxxxxxxxxxxxx

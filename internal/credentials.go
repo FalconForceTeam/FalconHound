@@ -18,6 +18,11 @@ type Credentials struct {
 	GraphTenantID          string `config:"graph.tenantID"`
 	GraphAppID             string `config:"graph.appID"`
 	GraphAppSecret         string `config:"graph.appSecret"`
+	AdxTenantID            string `config:"adx.tenantID"`
+	AdxAppID               string `config:"adx.appID"`
+	AdxAppSecret           string `config:"adx.appSecret"`
+	AdxClusterURL          string `config:"adx.clusterUrl"`
+	AdxDatabase            string `config:"adx.database"`
 	Neo4jUri               string `config:"neo4j.uri"`
 	Neo4jUsername          string `config:"neo4j.username"`
 	Neo4jPassword          string `config:"neo4j.password"`
@@ -30,4 +35,7 @@ type Credentials struct {
 	BHUrl                  string `config:"bloodhound.url"`
 	BHTokenID              string `config:"bloodhound.tokenID"`
 	BHTokenKey             string `config:"bloodhound.tokenKey"`
+	LogScaleUrl            string `config:"logscale.url"`
+	LogScaleToken          string `config:"logscale.token"`
+	LogScaleRepository     string `config:"logscale.repository"`
 }

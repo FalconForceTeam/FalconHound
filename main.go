@@ -32,6 +32,7 @@ type Target struct {
 	SearchKey     string            `yaml:"SearchKey,omitempty"`
 	BHQuery       string            `yaml:"BHQuery,omitempty"`
 	BatchSize     int               `yaml:"BatchSize,omitempty"`
+	Table         string            `yaml:"Table,omitempty"`
 }
 
 type Query struct {
@@ -65,7 +66,7 @@ func main() {
 	flag.StringVar(&ids, "ids", "", "comma separated list of action IDs to run")
 
 	var debug bool
-	flag.BoolVar((&debug), "debug", false, "Enable debug mode, for all executed actions")
+	flag.BoolVar(&debug, "debug", false, "Enable debug mode, for all executed actions")
 
 	var lookback string
 	flag.StringVar(&lookback, "lookback", "", "Override the timeframe in the queries, use the KQL supported format (1d,1h,15m,etc)")
@@ -75,6 +76,12 @@ func main() {
 
 	var cachedbFlag bool
 	flag.BoolVar(&cachedbFlag, "cachedb", false, "Update the cache database")
+
+	var skipinput string
+	flag.StringVar(&skipinput, "skip", "", "Skip the input processor for the specified source platform, comma separated list of platforms")
+
+	var adxinitFlag bool
+	flag.BoolVar(&adxinitFlag, "adxinit", false, "Initialize the Azure Data Explorer table (requires database admin permissions) and -go")
 
 	flag.Parse()
 
@@ -91,7 +98,7 @@ func main() {
 			// split ids on comma
 			actionIdFilters = append(actionIdFilters, strings.Split(ids, ",")...)
 		}
-		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug, lookback)
+		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug, lookback, skipinput, adxinitFlag)
 	} else if cachedbFlag {
 		cacheDb()
 		// globalCreds := cmd.GetCreds(configFile, keyvaultFlag)
@@ -197,6 +204,17 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				BHQuery:          target.BHQuery,
 			},
 		}, nil
+	case "ADX":
+		return &output_processor.ADXOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.ADXOutputConfig{
+				QueryName:        query.Name,
+				QueryDescription: query.Description,
+				QueryEventID:     query.ID,
+				BHQuery:          target.BHQuery,
+				Table:            target.Table,
+			},
+		}, nil
 	case "Splunk":
 		return &output_processor.SplunkOutputProcessor{
 			OutputProcessor: &baseOutput,
@@ -274,12 +292,17 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 			InputProcessor: &baseProcessor,
 			Config:         input_processor.SplunkConfig{},
 		}, nil
+	case "LogScale":
+		return &input_processor.LogScaleProcessor{
+			InputProcessor: &baseProcessor,
+			Config:         input_processor.LogScaleConfig{},
+		}, nil
 	default:
 		return nil, fmt.Errorf("source platform %q not supported", query.SourcePlatform)
 	}
 }
 
-func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool, debug bool, lookback string) {
+func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool, debug bool, lookback string, skipinput string, adxinitflag bool) {
 	// create error log
 	fileError, err := openLogFile("./error.log")
 	if err != nil {
@@ -336,6 +359,17 @@ func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilter
 				logError(errorLog, "failed to validate YAML in file %s: %v", filePath, err)
 				continue
 			}
+
+			// Skip creation of input processors for the specified source platforms
+			skipinput := strings.Split(skipinput, ",")
+			for _, platform := range skipinput {
+				if strings.EqualFold(strings.TrimSpace(platform), strings.TrimSpace(q.SourcePlatform)) {
+					logInfo("[i] Skipping input processor for %s", q.SourcePlatform)
+					//set enabled to false so the query is not run
+					q.Active = false
+				}
+			}
+
 			//count the active queries
 			if !q.Active {
 				continue
@@ -374,7 +408,11 @@ func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilter
 
 	globalCreds := cmd.GetCreds(configFile, keyvaultFlag)
 
-	// output_processor.BHSubmit("test", globalCreds)
+	if adxinitflag {
+		logInfo("[i] Adding the FalconHound table to Azure Data Explorer")
+		cmd.AdxInitTable(globalCreds)
+		return
+	}
 
 	var inputProcessors []input_processor.InputProcessorInterface = make([]input_processor.InputProcessorInterface, 0)
 

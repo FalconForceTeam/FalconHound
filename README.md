@@ -223,7 +223,7 @@ The Sentinel Watchlists target will write the results of the query to a Sentinel
     WatchlistName: FH_MDE_Exploitable_Machines
     DisplayName: MDE Exploitable Machines
     SearchKey: DeviceName
-    Overwrite: true       
+    Overwrite: true
 ```
 
 The `WatchlistName` field is the name of the watchlist. The `DisplayName` field is the display name of the watchlist. 
@@ -239,6 +239,15 @@ Like Sentinel, Splunk will write the results of the query to a Splunk index. The
 ```yaml
   - Name: Splunk
     Enabled: true
+```
+#### Azure Data Explorer
+
+Like Sentinel, Splunk will write the results of the query to a ADX table. The data from the query will be added to the EventData field.  The EventID will be the action ID and the Description will be the action name.
+
+```yaml
+  - Name: ADX
+    Enabled: true
+    Table: "name"
 ```
 
 ### Extensions to the graph
@@ -264,6 +273,8 @@ FalconHound will add the following properties to nodes in the graph:
 Computer:
     - 'exploitable': true/false
     - 'exploits': list of CVEs
+    - 'exposed': true/false
+    - 'ports': list of ports accessible from the internet
     - 'alertids': list of alert ids
 
 ## Credential management
@@ -309,12 +320,23 @@ Neo4jPassword
 GraphTenantID
 GraphAppID
 GraphAppSecret
+AdxTenantID
+AdxAppID
+AdxAppSecret
+AdxClusterURL
+AdxDatabase
 SplunkUrl
 SplunkApiToken
 SplunkIndex
 SplunkApiPort
 SplunkHecToken
 SplunkHecPort
+BHUrl
+BHTokenID
+BHTokenKey
+LogScaleUrl
+LogScaleToken
+LogScaleRepository
 ```
 
 Once configured you can add the `-keyvault` parameter while starting FalconHound.
