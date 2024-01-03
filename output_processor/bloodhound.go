@@ -273,8 +273,7 @@ func ComputerFactory(QueryResults internal.QueryResults, computerSIDs map[string
 		}
 		computer := internal.Computer{
 			ObjectIdentifier: computerSID,
-			Owned:            true,
-			AlertId:          result["set_AlertId"].(string),
+			Properties:       map[string]any{"owned": true, "alertid": result["set_AlertId"].(string)},
 		}
 		computers = append(computers, computer)
 	}

@@ -177,8 +177,7 @@ type Computer struct {
 	UserRights         []UserRightsAssignmentAPIResult
 	Status             ComputerStatus
 	HasSIDHistory      []TypedPrincipal
-	Owned              bool
-	AlertId            string
+	Properties         map[string]any
 	ObjectIdentifier   string
 }
 
