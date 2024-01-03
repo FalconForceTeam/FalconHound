@@ -1,6 +1,8 @@
 package internal
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // This file was created based on the following two sources:
 // https://github.com/SpecterOps/BloodHound/blob/b3fb3b79334fbb3d4ad8c5f025c89b7f8a92c4da/packages/go/ein/incoming_models.go#L88
@@ -175,6 +177,9 @@ type Computer struct {
 	UserRights         []UserRightsAssignmentAPIResult
 	Status             ComputerStatus
 	HasSIDHistory      []TypedPrincipal
+	Owned              bool
+	AlertId            string
+	ObjectIdentifier   string
 }
 
 type OU struct {

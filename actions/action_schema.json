@@ -55,7 +55,6 @@
                             "Splunk",
                             "Watchlist",
                             "BloodHound",
-                            "BHSession",
                             "LogScale",
                             "ADX"
                         ]
@@ -196,7 +195,7 @@
                         "if": {
                             "properties": {
                                 "Name": {
-                                    "const": "BHSession"
+                                    "const": "BloodHound"
                                 }
                             }
                         },
@@ -210,6 +209,9 @@
                                 },
                                 "BatchSize": {
                                     "type": "integer"
+                                },
+                                "OutputType": {
+                                    "type": "string"
                                 }
                             },
                             "additionalProperties": false

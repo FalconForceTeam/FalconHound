@@ -47,7 +47,17 @@ func GetCachedUserByName(db *sql.DB, key string) (string, error) {
 	var value string
 	err := db.QueryRow("SELECT objectid FROM userCache WHERE name = ?", key).Scan(&value)
 	if err != nil {
-		log.Println("Error getting cache for", key, ":", err)
+		//log.Println("Error getting cache for", key, ":", err)
+		return "error", err
+	}
+	return value, nil
+}
+
+func GetCachedComputerByName(db *sql.DB, key string) (string, error) {
+	var value string
+	err := db.QueryRow("SELECT objectid FROM computerCache WHERE name = ?", key).Scan(&value)
+	if err != nil {
+		//log.Println("Error getting cache for", key, ":", err)
 		return "error", err
 	}
 	return value, nil
@@ -69,6 +79,19 @@ func SetComputerCache(db *sql.DB, key string, value string) error {
 		return err
 	}
 	return nil
+}
+
+func GetCachedComputerByNames(db *sql.DB, keys []string) (map[string]string, error) {
+	results := make(map[string]string)
+	for _, key := range keys {
+		value, err := GetCachedComputerByName(db, key)
+		if err != nil {
+			//return nil, err
+			continue
+		}
+		results[key] = value
+	}
+	return results, nil
 }
 
 func DeleteCache(db *sql.DB, key string) error {

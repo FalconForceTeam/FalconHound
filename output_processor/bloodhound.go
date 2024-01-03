@@ -9,6 +9,7 @@ import (
 	"falconhound/internal"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -29,16 +30,17 @@ var SessionTypeMap map[string]int = map[string]int{
 	"CachedUnlock":            13,
 }
 
-type BHSessionOutputConfig struct {
-	BatchSize int
+type BloodHoundOutputConfig struct {
+	BatchSize  int
+	OutputType string
 }
 
-type BHSessionOutputProcessor struct {
+type BloodHoundOutputProcessor struct {
 	*OutputProcessor
-	Config BHSessionOutputConfig
+	Config BloodHoundOutputConfig
 }
 
-func (m *BHSessionOutputProcessor) BatchSize() int {
+func (m *BloodHoundOutputProcessor) BatchSize() int {
 	// If batch size is given in the config, use that
 	// otherwise default to 10
 	if m.Config.BatchSize > 0 {
@@ -124,7 +126,7 @@ func QueryBloodhoundAPI(uri string, method string, body []byte, creds internal.C
 	return response, nil
 }
 
-func (m *BHSessionOutputProcessor) UploadData(data []byte) error {
+func (m *BloodHoundOutputProcessor) UploadData(data []byte) error {
 	upload_job, err := QueryBloodhoundAPI("/api/v2/file-upload/start", "POST", nil, m.Credentials)
 	if err != nil {
 		return err
@@ -141,55 +143,55 @@ func (m *BHSessionOutputProcessor) UploadData(data []byte) error {
 	return nil
 }
 
-type CypherSearch struct {
-	Query             string `json:"query"`
-	IncludeProperties bool   `json:"include_properties,omitempty"`
-}
+//type CypherSearch struct {
+//	Query             string `json:"query"`
+//	IncludeProperties bool   `json:"include_properties,omitempty"`
+//}
 
-func (m *BHSessionOutputProcessor) GetComputerSIDS(ComputerNames []string) (map[string]string, error) {
-	// Use Json.Marshal to escape the computer names an put them into an array
-	// ["COMPUTER1", "COMPUTER2"] that we can use in the Cypher query
-	NamesAsJson, err := json.Marshal(ComputerNames)
-	if err != nil {
-		return nil, err
-	}
-	// For now we have to use a separate Cypher query to get the computer names.
-	// Also, this query must return a full computer node, otherwise the query results in an error.
-	query := fmt.Sprintf("MATCH (c:Computer) WHERE c.name IN %s RETURN c", NamesAsJson)
-	cypherSearch := CypherSearch{
-		Query:             query,
-		IncludeProperties: false,
-	}
-	cypherSearchAsJson, err := json.Marshal(cypherSearch)
-	if err != nil {
-		return nil, err
-	}
+//func (m *BloodHoundOutputProcessor) GetComputerSIDS(ComputerNames []string) (map[string]string, error) {
+//	// Use Json.Marshal to escape the computer names an put them into an array
+//	// ["COMPUTER1", "COMPUTER2"] that we can use in the Cypher query
+//	NamesAsJson, err := json.Marshal(ComputerNames)
+//	if err != nil {
+//		return nil, err
+//	}
+//	// For now we have to use a separate Cypher query to get the computer names.
+//	// Also, this query must return a full computer node, otherwise the query results in an error.
+//	query := fmt.Sprintf("MATCH (c:Computer) WHERE c.name IN %s RETURN c", NamesAsJson)
+//	cypherSearch := CypherSearch{
+//		Query:             query,
+//		IncludeProperties: false,
+//	}
+//	cypherSearchAsJson, err := json.Marshal(cypherSearch)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	query_results, err := QueryBloodhoundAPI("/api/v2/graphs/cypher", "POST", cypherSearchAsJson, m.Credentials)
+//	if err != nil {
+//		return nil, err
+//	}
+//	results := make(map[string]string)
+//	if query_results.Data.Nodes == nil {
+//		return results, nil
+//	}
+//	for _, node := range query_results.Data.Nodes {
+//		// Check if node has both label and objectId fields
+//		nodeName, ok := node.(map[string]interface{})["label"].(string)
+//		if !ok {
+//			continue
+//		}
+//		nodeObjectId, ok := node.(map[string]interface{})["objectId"].(string)
+//		if !ok {
+//			continue
+//		}
+//		results[nodeName] = nodeObjectId
+//	}
+//
+//	return results, err
+//}
 
-	query_results, err := QueryBloodhoundAPI("/api/v2/graphs/cypher", "POST", cypherSearchAsJson, m.Credentials)
-	if err != nil {
-		return nil, err
-	}
-	results := make(map[string]string)
-	if query_results.Data.Nodes == nil {
-		return results, nil
-	}
-	for _, node := range query_results.Data.Nodes {
-		// Check if node has both label and objectId fields
-		nodeName, ok := node.(map[string]interface{})["label"].(string)
-		if !ok {
-			continue
-		}
-		nodeObjectId, ok := node.(map[string]interface{})["objectId"].(string)
-		if !ok {
-			continue
-		}
-		results[nodeName] = nodeObjectId
-	}
-
-	return results, err
-}
-
-func (m *BHSessionOutputProcessor) ProduceOutput(QueryResults internal.QueryResults) error {
+func (m *BloodHoundOutputProcessor) ProduceOutput(QueryResults internal.QueryResults) error {
 	// Build a list of unique computer names
 	computerNameHash := make(map[string]struct{})
 	for _, result := range QueryResults {
@@ -202,12 +204,28 @@ func (m *BHSessionOutputProcessor) ProduceOutput(QueryResults internal.QueryResu
 	}
 
 	// Obtain the computer SIDs for the computer names using a Cypher query
-	computerSIDs, err := m.GetComputerSIDS(computerNames)
-	if err != nil {
-		return err
+	//computerSIDs, err := m.GetComputerSIDS(computerNames)
+	//if err != nil {
+	//	return err
+	//}
+	cachedb, _ := internal.OpenDB("cache.db")
+	computerSIDs, _ := internal.GetCachedComputerByNames(cachedb, computerNames)
+	//fmt.Println("results from query: ", computerSIDs)
+	internal.CloseDB(cachedb)
+
+	switch m.Config.OutputType {
+	case "Session":
+		return m.UploadData(SessionFactory(QueryResults, computerSIDs))
+	case "Computer":
+		return m.UploadData(ComputerFactory(QueryResults, computerSIDs))
 	}
 
-	// Construct session data
+	//json := SessionFactory(QueryResults, computerSIDs)
+	//return m.UploadData(json)
+	return nil
+}
+
+func SessionFactory(QueryResults internal.QueryResults, computerSIDs map[string]string) []byte {
 	sessions := make([]internal.Session, 0)
 	for _, result := range QueryResults {
 		logonType, ok := SessionTypeMap[result["LogonType"].(string)]
@@ -217,9 +235,11 @@ func (m *BHSessionOutputProcessor) ProduceOutput(QueryResults internal.QueryResu
 		deviceName := strings.ToUpper(result["DeviceName"].(string))
 		computerSID, ok := computerSIDs[deviceName]
 		if !ok {
-			// fmt.Printf("Warning - could not find computer SID for device %s\n", deviceName)
+			log.Printf("Warning - could not find computer SID for device %s\n", deviceName)
 			continue
 		}
+		// additional properties sadly not possible https://github.com/SpecterOps/BloodHound/blob/f35ce41e2a41ab39d4614afd7cf1f3f584ae6328/cmd/api/src/daemons/datapipe/ingest.go#L338
+		// schema > https://github.com/SpecterOps/BloodHound/blob/main/packages/go/graphschema/ad/ad.go
 		session := internal.Session{
 			ComputerSID: computerSID,
 			UserSID:     result["AccountSid"].(string),
@@ -232,15 +252,59 @@ func (m *BHSessionOutputProcessor) ProduceOutput(QueryResults internal.QueryResu
 		Methods: internal.CollectionMethodSession,
 		Version: 6,
 	}
-	json, err := FormatBHSessions(metadata, sessions)
+	json, err := FormatBloodHounds(metadata, sessions)
 	if err != nil {
-		return err
+		return nil
 	}
 	fmt.Printf("Uploading %d sessions\n", len(sessions))
-	return m.UploadData(json)
+	//fmt.Println(string(json))
+	return json
 }
 
-func FormatBHSessions(metaData internal.Metadata, sessions []internal.Session) ([]byte, error) {
+func ComputerFactory(QueryResults internal.QueryResults, computerSIDs map[string]string) []byte {
+	computers := make([]internal.Computer, 0)
+	for _, result := range QueryResults {
+
+		deviceName := strings.ToUpper(result["DeviceName"].(string))
+		computerSID, ok := computerSIDs[deviceName]
+		if !ok {
+			log.Printf("Warning - could not find computer SID for device %s\n", deviceName)
+			continue
+		}
+		computer := internal.Computer{
+			ObjectIdentifier: computerSID,
+			Owned:            true,
+			AlertId:          result["set_AlertId"].(string),
+		}
+		computers = append(computers, computer)
+	}
+	metadata := internal.Metadata{
+		Type:    internal.DataTypeComputer,
+		Methods: 291819,
+		Version: 6,
+	}
+	json, err := FormatBloodHounds2(metadata, computers)
+	if err != nil {
+		return nil
+	}
+	fmt.Printf("Uploading changes to %d computers\n", len(computers))
+	fmt.Println(string(json))
+	return json
+}
+
+func FormatBloodHounds(metaData internal.Metadata, sessions []internal.Session) ([]byte, error) {
+	payload, err := json.Marshal(sessions)
+	if err != nil {
+		return nil, err
+	}
+	jsonData := internal.DataWrapper{
+		Metadata: metaData,
+		Payload:  payload,
+	}
+	return json.MarshalIndent(jsonData, "", "  ")
+}
+
+func FormatBloodHounds2(metaData internal.Metadata, sessions []internal.Computer) ([]byte, error) {
 	payload, err := json.Marshal(sessions)
 	if err != nil {
 		return nil, err

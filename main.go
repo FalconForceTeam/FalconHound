@@ -33,6 +33,7 @@ type Target struct {
 	BHQuery       string            `yaml:"BHQuery,omitempty"`
 	BatchSize     int               `yaml:"BatchSize,omitempty"`
 	Table         string            `yaml:"Table,omitempty"`
+	OutputType    string            `yaml:"OutputType,omitempty"`
 }
 
 type Query struct {
@@ -238,11 +239,12 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				Overwrite:     target.Overwrite,
 			},
 		}, nil
-	case "BHSession":
-		return &output_processor.BHSessionOutputProcessor{
+	case "BloodHound":
+		return &output_processor.BloodHoundOutputProcessor{
 			OutputProcessor: &baseOutput,
-			Config: output_processor.BHSessionOutputConfig{
-				BatchSize: target.BatchSize,
+			Config: output_processor.BloodHoundOutputConfig{
+				BatchSize:  target.BatchSize,
+				OutputType: target.OutputType,
 			},
 		}, nil
 	default:
@@ -511,14 +513,12 @@ func cacheDb() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cachedb, _ := internal.OpenDB("cache.db")
-	userCount, computerCount, _ := internal.GetCacheCount(cachedb)
-	log.Printf("Cache contains %d users and %d computers", userCount, computerCount)
-	// internal.ClearUserCache(cachedb)
-	internal.SetUserCache(cachedb, "13121-1212121-1212-1212-6542-12123212", "willem@sloeber.nl")
-	// query, _ := internal.GetCachedUserByName(cachedb, "olafhartong")
-	// log.Println("User found, objectid =", query)
-	internal.CloseDB(cachedb)
+	//cachedb, _ := internal.OpenDB("cache.db")
+	//userCount, computerCount, _ := internal.GetCacheCount(cachedb)
+	//log.Printf("Cache contains %d users and %d computers", userCount, computerCount)
+	//query, _ := internal.GetCachedComputerByName(cachedb, "WS1.BALLPIT.INT")
+	//log.Println("Computer found, objectid =", query)
+	//internal.CloseDB(cachedb)
 }
 
 type BHobjects struct {
