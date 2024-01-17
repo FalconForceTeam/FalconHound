@@ -20,6 +20,10 @@ type LogScaleProcessor struct {
 }
 
 func (m *LogScaleProcessor) ExecuteQuery() (internal.QueryResults, error) {
+	if m.Credentials.LogScaleToken == "" {
+		return internal.QueryResults{}, fmt.Errorf("LogScaleToken is empty, skipping..")
+	}
+
 	results, err := queryLogscale(m.Query, m.Credentials, m.Debug)
 	if err != nil {
 		if strings.Contains(err.Error(), "unexpected HTTP status code: 400") {

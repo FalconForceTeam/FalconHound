@@ -3,6 +3,7 @@ package input_processor
 import (
 	"encoding/json"
 	"falconhound/internal"
+	"fmt"
 	"log"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -17,6 +18,10 @@ type Neo4jProcessor struct {
 }
 
 func (m *Neo4jProcessor) ExecuteQuery() (internal.QueryResults, error) {
+	if m.Credentials.Neo4jPassword == "" {
+		return internal.QueryResults{}, fmt.Errorf("Neo4jPassword is empty, skipping..")
+	}
+
 	results, err := ReadNeo4j(m.Query, m.Credentials)
 	if err != nil {
 		return internal.QueryResults{}, err
