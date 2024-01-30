@@ -203,6 +203,7 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				QueryEventID:     query.ID,
 				BHQuery:          target.BHQuery,
 				Table:            target.Table,
+				BatchSize:        target.BatchSize,
 			},
 		}, nil
 	case "Splunk":
@@ -296,6 +297,11 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 		return &input_processor.LogScaleProcessor{
 			InputProcessor: &baseProcessor,
 			Config:         input_processor.LogScaleConfig{},
+		}, nil
+	case "Elastic":
+		return &input_processor.ElasticProcessor{
+			InputProcessor: &baseProcessor,
+			Config:         input_processor.ElasticConfig{},
 		}, nil
 	default:
 		return nil, fmt.Errorf("source platform %q not supported", query.SourcePlatform)

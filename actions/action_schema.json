@@ -34,7 +34,8 @@
                 "BloodHound",
                 "MSGraph",
                 "Splunk",
-                "LogScale"
+                "LogScale",
+                "Elastic"
             ]
         },
         "Version": {

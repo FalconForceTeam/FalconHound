@@ -1,0 +1,26 @@
+Name: Get new logon sessions
+ID: ELK_New_Sessions
+Description: Gets all logon events from Elastic Cloud and sends them to Neo4j
+Author: FalconForce
+Version: '1.0'
+Info: |
+  Gets all logon events from Elastic Cloud, filters out non-user logons, and creates a relationship between the computer and the user in Neo4j, 
+  with the timestamp of the first logon event.
+Active: true                                                # Enable to run this action
+Debug: false                                                 # Enable to see query results in the console
+SourcePlatform: Elastic                                      # Sentinel, Watchlist, Neo4j, CSV, MDE, Graph, Splunk
+Query: |                                                    # Splunk index can be hardcoded or a variable set in the config.yml file
+  @timestamp:[now-15h TO now]
+  AND winlog.event_id: 4624
+  AND winlog.event_data.TargetUserSid: *S-1-5-21-* 
+  AND winlog.event_data.LogonType: (2 OR 10 OR 11 OR 12 OR 13 OR 14 OR 15)
+Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH toUpper($Computer) as Computer, toUpper($TargetUserSid) as TargetUserSid, $Timestamp as Timestamp
+      MATCH (x:Computer {name:Computer}) MATCH (y:User {objectid:TargetUserSid}) MERGE (x)-[r:HasSession]->(y) SET r.since=Timestamp SET r.source='falconhound'
+    Parameters:
+      Computer: winlog.computer_name
+      TargetUserSid: winlog.event_data.TargetUserSid
+      Timestamp: "@timestamp"
