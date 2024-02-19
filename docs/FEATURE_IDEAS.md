@@ -35,8 +35,8 @@ BH(E) API - under development
 Generic output processors
 - [ ] Write BH compatible JSON outputs
 - [ ] Write markdown outputs
-- [ ] Write to storage account
-- [ ] Write to ADX
+- [x] Write to storage account
+- [-] Write to ADX (beta)
 
 GraphAPI
 - [ ] Look into Defender, AAD, Intune, CA policies, ?
@@ -54,7 +54,7 @@ GraphAPI
 - [ ] Add check that if a credential is empty in the config the in/out processor is not used
 
 - [ ] Add more logging
-- [ ] Add more error handling
+- [x] Add more error handling
 
 ## Future releases
 

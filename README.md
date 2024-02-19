@@ -52,7 +52,7 @@ Currently, FalconHound supports the following data sources and or targets:
 - Neo4j
 - MS Graph API (early stage)
 - CSV files
-- Azure Data Explorer (ADX)
+- Azure Data Explorer (ADX) - beta
 - LogScale
 - BloodHound CE and BHE (early stage)
 - MarkDown files 
