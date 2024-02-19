@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
+	"time"
 )
 
 type CSVOutputConfig struct {
@@ -29,6 +31,13 @@ func (m *CSVOutputProcessor) ProduceOutput(QueryResults internal.QueryResults) e
 
 // WriteCSV writes the results to a CSV file
 func WriteCSV(results internal.QueryResults, path string) error {
+	//replace {{date}} with the current date if it exists
+	path = strings.Replace(path, "{{date}}", time.Now().Format("2006-01-02"), 1)
+	// create the folder if it doesn't exist
+	err := os.MkdirAll(path[:strings.LastIndex(path, "/")], 0755)
+	if err != nil {
+		return fmt.Errorf("failed creating folder: %w", err)
+	}
 	// Create a file for writing
 	csvFile, err := os.Create(path)
 	if err != nil {
