@@ -152,7 +152,7 @@
                         "if": {
                             "properties": {
                                 "Name": {
-                                    "const": "AXD"
+                                    "const": "ADX"
                                 }
                             }
                         },
@@ -169,6 +169,9 @@
                                 },
                                 "Enabled": {
                                     "type": "boolean"
+                                },
+                                "BatchSize" : {
+                                    "type": "integer"
                                 }
                             },
                             "additionalProperties": false
