@@ -62,6 +62,10 @@ func WriteMD(results internal.QueryResults, config MDOutputConfig) error {
 	table += fmt.Sprintf("Date: %s\n\n", config.QueryDate)
 	table += "| " + strings.Join(headers, " | ") + " |\n"
 	table += "| " + strings.Repeat("--- | ", len(headers)) + "\n"
+	_, err = MDWriter.WriteString(table)
+	if err != nil {
+		return fmt.Errorf("failed writing to file: %w", err)
+	}
 
 	// Generate the table rows
 	for _, row := range results {
@@ -70,11 +74,11 @@ func WriteMD(results internal.QueryResults, config MDOutputConfig) error {
 			value := fmt.Sprintf("%v", row[header])
 			values = append(values, value)
 		}
-		table += "| " + strings.Join(values, " | ") + " |\n"
-	}
-	_, err = MDWriter.WriteString(table)
-	if err != nil {
-		return fmt.Errorf("failed writing to file: %w", err)
+		tablerow := "| " + strings.Join(values, " | ") + " |\n"
+		_, err = MDWriter.WriteString(tablerow)
+		if err != nil {
+			return fmt.Errorf("failed writing row to file: %w", err)
+		}
 	}
 
 	MDWriter.Flush()
