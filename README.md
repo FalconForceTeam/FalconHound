@@ -52,6 +52,11 @@ Currently, FalconHound supports the following data sources and or targets:
 - Neo4j
 - MS Graph API (early stage)
 - CSV files
+- Azure Data Explorer (ADX)
+- LogScale
+- BloodHound CE and BHE (early stage)
+- MarkDown files 
+- Elastic (early stage)
 
 Additional data sources and targets are planned for the future.
 
@@ -177,10 +182,38 @@ Each target has several options that can be configured. Depending on the target,
 All targets have the `Name` and  `Enabled` fields. The `Name` field is used to identify the target. The `Enabled` field is used to enable or disable the target. If this is set to false, the target will be ignored.
 
 #### CSV
+
+CSV supports the {{date}} variable, which will be replaced by the current date in the format `YYYY-MM-DD`. This can be used to create daily reports.
+This can be used in a folder or file name (e.g. `path/to/filename-{{date}}.csv`) or in the foldername itself.
+
 ```yaml
   - Name: CSV
     Enabled: true
     Path: path/to/filename.csv
+```
+
+#### Markdown
+
+Markdown supports the {{date}} variable, which will be replaced by the current date in the format `YYYY-MM-DD`. This can be used to create daily reports.
+This can be used in a folder or file name (e.g. `path/to/filename-{{date}}.md`) or in the foldername itself.
+
+```yaml
+  - Name: Markdown
+    Enabled: true
+    Path: path/to/filename.md
+```
+ Example output:
+```markdown
+# Results for query: N4J_REPORT_DomainAdmins
+
+## Get a list of Domain Admins
+
+Description: Get a list of Domain Admins.
+Date: 2024-02-19
+
+| Name | ObjectID |
+| --- | --- |
+| user@domain.NET | S-1-5-21-1122334455-112233445-1112223334-11223344 |
 ```
 
 #### Neo4j
