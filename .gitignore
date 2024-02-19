@@ -13,4 +13,4 @@ dist/*
 .goreleaser.yaml
 cache.db
 .idea/*
-report/*
+report/*/*
