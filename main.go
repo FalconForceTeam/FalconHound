@@ -184,7 +184,7 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				Path: target.Path,
 			},
 		}, nil
-	case "MarkDown":
+	case "Markdown":
 		return &output_processor.MDOutputProcessor{
 			OutputProcessor: &baseOutput,
 			Config: output_processor.MDOutputConfig{

@@ -20,6 +20,6 @@ Targets:
     Enabled: false
     Table: FalconHound
     BatchSize: 1000
-  - Name: MarkDown
+  - Name: Markdown
     Enabled: true
     Path: report/{{date}}/{{date}}-DomainAdmins.md
