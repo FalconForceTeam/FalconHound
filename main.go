@@ -184,6 +184,17 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				Path: target.Path,
 			},
 		}, nil
+	case "MarkDown":
+		return &output_processor.MDOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.MDOutputConfig{
+				Path:             target.Path,
+				QueryName:        query.Name,
+				QueryDescription: query.Description,
+				QueryEventID:     query.ID,
+				QueryDate:        time.Now().Format("2006-01-02"),
+			},
+		}, nil
 	case "Sentinel":
 		return &output_processor.SentinelOutputProcessor{
 			OutputProcessor: &baseOutput,

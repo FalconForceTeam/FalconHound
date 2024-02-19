@@ -59,7 +59,8 @@
                             "BHSession",
                             "LogScale",
                             "ADX",
-                            "LimaCharlie"
+                            "LimaCharlie",
+                            "MarkDown"
                         ]
                     },
                     "Enabled": {
@@ -72,6 +73,32 @@
                             "properties": {
                                 "Name": {
                                     "const": "CSV"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                },
+                                "Path": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "Path"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "MarkDown"
                                 }
                             }
                         },

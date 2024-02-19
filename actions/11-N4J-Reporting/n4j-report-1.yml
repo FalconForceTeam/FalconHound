@@ -1,0 +1,25 @@
+Name: Get a list of Domain Admins
+ID: N4J_REPORT_DomainAdmins
+Description: Get a list of Domain Admins.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (n:Group) 
+  WHERE n.objectid =~ '(?i)S-1-5.*-512' 
+  WITH n MATCH (n)<-[r:MemberOf*1..]-(m) 
+  RETURN {Name: m.name , ObjectID: m.objectid} as info
+Targets:
+  - Name: CSV
+    Enabled: true
+    Path: report/{{date}}/{{date}}-DomainAdmins.csv
+  - Name: ADX
+    Enabled: false
+    Table: FalconHound
+    BatchSize: 1000
+  - Name: MarkDown
+    Enabled: true
+    Path: report/{{date}}/{{date}}-DomainAdmins.md
