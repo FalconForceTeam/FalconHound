@@ -33,6 +33,7 @@
                 "Neo4j",
                 "BloodHound",
                 "MSGraph",
+                "MSGraphApi",
                 "Splunk",
                 "LogScale",
                 "Elastic"

@@ -1,0 +1,32 @@
+Name: Get MFA Status
+ID: GRAPH_MFA_Status
+Description: Get per user MFA settings. WARNING, this will be slow. Requires User.Read.All and UserAuthenticationMethod.Read.All permissions
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: false                 # Enable to run this action
+Debug: true                  # Enable to see query results in the console
+SourcePlatform: MSGraphApi          # Sentinel, Watchlist, Neo4j, MDE, Graph, Splunk
+Query: |
+  GetMFA
+Targets:   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH toUpper($objectid) as objectid, $MfaAuthMethods as MfaAuthMethods, $MfaPhoneNumber as MfaPhoneNumber, $MfaSmsMethod as MfaSmsMethod, $MfaSignInPreference as MfaSignInPreference, toUpper($MfaEmailAddress) as MfaEmailAddress, $MfaHelloDevice as MfaHelloDevice, $MfaFidoDeviceName as MfaFidoDeviceName, $MfaFidoModel as MfaFidoModel, $MfaAuthenticatorDeviceName as MfaAuthenticatorDeviceName
+      MATCH (t {objectid: objectid})
+      SET t.MfaAuthMethods = MfaAuthMethods, t.MfaPhoneNumber = MfaPhoneNumber, t.MfaSmsMethod = MfaSmsMethod, t.MfaSignInPreference = MfaSignInPreference, t.MfaEmailAddress = MfaEmailAddress, t.MfaHelloDevice = MfaHelloDevice, t.MfaFidoDeviceName = MfaFidoDeviceName, t.MfaFidoModel = MfaFidoModel, t.MfaAuthenticatorDeviceName = MfaAuthenticatorDeviceName
+    Parameters:
+      objectid: ObjectId
+      MfaAuthMethods: MfaAuthMethods
+      MfaPhoneNumber: PhoneNumber
+      MfaSmsMethod: SmsSignInState
+      MfaSignInPreference: SignInPreference
+      MfaEmailAddress: MfaEmailAddress
+      MfaHelloDevice: HelloDevice
+      MfaFidoDeviceName: FidoDeviceName
+      MfaFidoModel: FidoModel
+      MfaAuthenticatorDeviceName: AuthenticatorDeviceName
+  - Name: Markdown
+    Enabled: true
+    Path: report/TEST/MFA.md

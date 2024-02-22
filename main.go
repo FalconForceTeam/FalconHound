@@ -299,6 +299,11 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 			InputProcessor: &baseProcessor,
 			Config:         input_processor.MSGraphConfig{},
 		}, nil
+	case "MSGraphApi":
+		return &input_processor.MsGraphApiProcessor{
+			InputProcessor: &baseProcessor,
+			Config:         input_processor.MsGraphApiConfig{},
+		}, nil
 	case "Splunk":
 		return &input_processor.SplunkProcessor{
 			InputProcessor: &baseProcessor,
