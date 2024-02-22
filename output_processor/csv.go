@@ -5,6 +5,7 @@ import (
 	"falconhound/internal"
 	"fmt"
 	"os"
+	"reflect"
 	"sort"
 	"strings"
 	"time"
@@ -66,6 +67,20 @@ func WriteCSV(results internal.QueryResults, path string) error {
 			v, ok := record[k]
 			if !ok {
 				v = nil
+			}
+			// Check if the value is a slice
+			if reflect.TypeOf(v).Kind() == reflect.Slice {
+				// Check if the slice elements are of type string
+				if reflect.TypeOf(v).Elem().Kind() == reflect.String {
+					v = strings.Join(v.([]string), ", ")
+				} else if reflect.TypeOf(v).Elem().Kind() == reflect.Interface {
+					// Handle the case where the slice elements are of type interface{}
+					var strSlice []string
+					for _, elem := range v.([]interface{}) {
+						strSlice = append(strSlice, fmt.Sprintf("%v", elem))
+					}
+					v = strings.Join(strSlice, ", ")
+				}
 			}
 			row = append(row, fmt.Sprintf("%v", v))
 		}
