@@ -75,6 +75,17 @@ func (m *MsGraphApiProcessor) ExecuteQuery() (internal.QueryResults, error) {
 			return internal.QueryResults{}, fmt.Errorf("failed to unmarshal JSON: %v", err)
 		}
 		return MsGraphApiResults, nil
+	case "GetDynamicGroups":
+		results, err := input_cmd.GetDynamicGroups(_MSGraphApiSession.client)
+		if err != nil {
+			return internal.QueryResults{}, fmt.Errorf("GetDynamicGroups failed: %v", err)
+		}
+		err = json.Unmarshal([]byte(results), &MsGraphApiResults)
+		if err != nil {
+			return internal.QueryResults{}, fmt.Errorf("failed to unmarshal JSON: %v", err)
+
+		}
+		return MsGraphApiResults, nil
 	}
 
 	return nil, fmt.Errorf("Query not found: %s", m.Query)
