@@ -23,7 +23,7 @@ type OauthConsent struct {
 func GetOAuthConsent(graphClient msgraphsdk.GraphServiceClient) ([]byte, error) {
 	userRiskDetection, err := graphClient.Oauth2PermissionGrants().Get(context.Background(), nil)
 	if err != nil {
-		fmt.Println("Error getting user risk detection:", err)
+		fmt.Println("Error getting consented apps:", err)
 		return nil, err
 	}
 	oauthconsentperAccount := make([]OauthConsent, 0)
@@ -41,7 +41,7 @@ func GetOAuthConsent(graphClient msgraphsdk.GraphServiceClient) ([]byte, error) 
 		return true
 	})
 	if err != nil {
-		fmt.Println("Error iterating role assignment schedule requests:", err)
+		fmt.Println("Error iterating role app consents:", err)
 		return nil, err
 	}
 	json, err := json.MarshalIndent(oauthconsentperAccount, "", "  ")
