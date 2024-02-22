@@ -15,11 +15,11 @@ Query: |
 Targets:
   - Name: CSV
     Enabled: true
-    Path: report/{{date}}/{{date}}-DomainAdmins.csv
+    Path: report/{{date}}/BH-DA.1_pathToDA_{{date}}.csv
   - Name: ADX
     Enabled: false
     Table: FalconHound
     BatchSize: 1000
   - Name: Markdown
     Enabled: true
-    Path: report/{{date}}/{{date}}-DomainAdmins.md
+    Path: report/{{date}}/BH-DA.1_pathToDA_{{date}}.md
