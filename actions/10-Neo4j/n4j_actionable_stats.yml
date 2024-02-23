@@ -1,0 +1,27 @@
+Name: N4J Actionble Stats
+ID: N4J_Actionable_Stats
+Description: This action gets actionable BloodHound stats.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j
+Query: |
+  MATCH (r:User {owned:true}) RETURN {ownedUsers:COUNT(r)} as Stats
+  UNION
+  MATCH (r:Computer {owned:true}) RETURN {ownedComputers:COUNT(r)} as Stats
+  UNION
+  MATCH (r:Computer {exposed:true}) RETURN {exposedComputers:COUNT(r)} as Stats
+  UNION
+  MATCH (r:Computer {exploitable:true}) RETURN {exploitableComputers:COUNT(r)} as Stats
+  UNION
+  MATCH ()-[r:HasSession]->() RETURN {activeSessions:COUNT(r)} as Stats
+  UNION
+  MATCH ()-[r:HadSession]->() RETURN {formerSessions:COUNT(r)} as Stats
+Targets:
+  - Name: Sentinel
+    Enabled: true
+  - Name: Markdown
+    Enabled: false
+    Path: report/ActionableStats-{{date}}.md
