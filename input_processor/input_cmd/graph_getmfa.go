@@ -27,6 +27,7 @@ func GetMFA(graphClient msgraphsdk.GraphServiceClient) ([]byte, error) {
 		ObjectId                string
 		UserName                string
 		AuthenticatorDeviceName string
+		AuthenticatorDeviceId   string
 		FidoDeviceName          string
 		FidoModel               string
 		MfaEmailAddress         string
@@ -113,6 +114,7 @@ func GetMFA(graphClient msgraphsdk.GraphServiceClient) ([]byte, error) {
 				ma, _ := graphClient.Users().ByUserId(*user.GetId()).Authentication().MicrosoftAuthenticatorMethods().Get(context.Background(), nil)
 				maData := ma.GetValue()
 				settings.AuthenticatorDeviceName = *maData[0].GetDisplayName()
+				settings.AuthenticatorDeviceId = *maData[0].GetId()
 			}
 			if *method.GetOdataType() == "#microsoft.graph.fido2AuthenticationMethod" {
 				fido, _ := graphClient.Users().ByUserId(*user.GetId()).Authentication().Fido2Methods().Get(context.Background(), nil)
@@ -126,7 +128,6 @@ func GetMFA(graphClient msgraphsdk.GraphServiceClient) ([]byte, error) {
 				settings.MfaEmailAddress = *emailData[0].GetEmailAddress()
 			}
 			// add the auth methods to a single string for easier ingestion into neo4j
-			//settings.MfaAuthMethods = strings.Join(settings.AuthMethods, ",")
 			settings.MfaAuthMethods = settings.AuthMethods
 		}
 		mfaSettingsPerUser = append(mfaSettingsPerUser, settings)

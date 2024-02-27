@@ -4,7 +4,7 @@ Description: Get per user MFA settings. WARNING, this will be slow. Requires Use
 Author: FalconForce
 Version: '1.0'
 Info: |-
-Active: false                 # Enable to run this action
+Active: true                 # Enable to run this action
 Debug: false                  # Enable to see query results in the console
 SourcePlatform: MSGraphApi          # Sentinel, Watchlist, Neo4j, MDE, Graph, Splunk
 Query: |
@@ -13,9 +13,9 @@ Targets:   # Targets are the platforms that this action will push to (CSV, Neo4j
   - Name: Neo4j
     Enabled: true
     Query: |
-      WITH toUpper($objectid) as objectid, $MfaAuthMethods as MfaAuthMethods, $MfaPhoneNumber as MfaPhoneNumber, $MfaSmsMethod as MfaSmsMethod, $MfaSignInPreference as MfaSignInPreference, toUpper($MfaEmailAddress) as MfaEmailAddress, $MfaHelloDevice as MfaHelloDevice, $MfaFidoDeviceName as MfaFidoDeviceName, $MfaFidoModel as MfaFidoModel, $MfaAuthenticatorDeviceName as MfaAuthenticatorDeviceName
+      WITH toUpper($objectid) as objectid, $MfaAuthMethods as MfaAuthMethods, $MfaPhoneNumber as MfaPhoneNumber, $MfaSmsMethod as MfaSmsMethod, $MfaSignInPreference as MfaSignInPreference, toUpper($MfaEmailAddress) as MfaEmailAddress, $MfaHelloDevice as MfaHelloDevice, $MfaFidoDeviceName as MfaFidoDeviceName, $MfaFidoModel as MfaFidoModel, $MfaAuthenticatorDeviceName as MfaAuthenticatorDeviceName, $MfaAuthenticatorDeviceId as MfaAuthenticatorDeviceId
       MATCH (t {objectid: objectid})
-      SET t.MfaAuthMethods = MfaAuthMethods, t.MfaPhoneNumber = MfaPhoneNumber, t.MfaSmsMethod = MfaSmsMethod, t.MfaSignInPreference = MfaSignInPreference, t.MfaEmailAddress = MfaEmailAddress, t.MfaHelloDevice = MfaHelloDevice, t.MfaFidoDeviceName = MfaFidoDeviceName, t.MfaFidoModel = MfaFidoModel, t.MfaAuthenticatorDeviceName = MfaAuthenticatorDeviceName
+      SET t.MfaAuthMethods = MfaAuthMethods, t.MfaPhoneNumber = MfaPhoneNumber, t.MfaSmsMethod = MfaSmsMethod, t.MfaSignInPreference = MfaSignInPreference, t.MfaEmailAddress = MfaEmailAddress, t.MfaHelloDevice = MfaHelloDevice, t.MfaFidoDeviceName = MfaFidoDeviceName, t.MfaFidoModel = MfaFidoModel, t.MfaAuthenticatorDeviceName = MfaAuthenticatorDeviceName, t.MfaAuthenticatorDeviceId = MfaAuthenticatorDeviceId
     Parameters:
       objectid: ObjectId
       MfaAuthMethods: MfaAuthMethods
@@ -27,6 +27,7 @@ Targets:   # Targets are the platforms that this action will push to (CSV, Neo4j
       MfaFidoDeviceName: FidoDeviceName
       MfaFidoModel: FidoModel
       MfaAuthenticatorDeviceName: AuthenticatorDeviceName
+      MfaAuthenticatorDeviceId: AuthenticatorDeviceId
   - Name: Markdown
     Enabled: false
     Path: report/TEST/MFA.md
