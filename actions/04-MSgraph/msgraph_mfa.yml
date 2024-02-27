@@ -5,7 +5,7 @@ Author: FalconForce
 Version: '1.0'
 Info: |-
 Active: false                 # Enable to run this action
-Debug: true                  # Enable to see query results in the console
+Debug: false                  # Enable to see query results in the console
 SourcePlatform: MSGraphApi          # Sentinel, Watchlist, Neo4j, MDE, Graph, Splunk
 Query: |
   GetMFA
@@ -28,5 +28,5 @@ Targets:   # Targets are the platforms that this action will push to (CSV, Neo4j
       MfaFidoModel: FidoModel
       MfaAuthenticatorDeviceName: AuthenticatorDeviceName
   - Name: Markdown
-    Enabled: true
+    Enabled: false
     Path: report/TEST/MFA.md
