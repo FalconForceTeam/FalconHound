@@ -1,0 +1,20 @@
+Name: EDGE - Add MFA AuthenticatorDevice Sharing edges
+ID: N4J_EDGE_ADD_MFAAUTHDEVICE_SHARING
+Description: Checks for accounts with the same MFA Authenticator device and adds a MfaDeviceSharing edge.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+    MATCH (user1:AZUser)
+    WHERE user1.MfaAuthenticatorDeviceId IS NOT NULL AND  user1.MfaAuthenticatorDeviceId <> ""
+    WITH user1.MfaAuthenticatorDeviceId AS device, COLLECT(user1) AS users
+    UNWIND users AS u1
+    UNWIND users AS u2
+    WITH u1, u2
+    WHERE id(u1) < id(u2)
+    MERGE (u1)-[r:MfaDeviceSharing]-(u2)
+    SET r.enforced = false
+Targets: []

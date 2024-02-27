@@ -1,0 +1,53 @@
+Name: User MFA setting updates
+ID: SEN_AZ_MFA_Updates
+Description: Gets all additive and updates to MFA settings, deletions are not captured
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                                               # Enable to run this action
+Debug: false                                                 # Enable to see query results in the console
+SourcePlatform: Sentinel                                    # Sentinel, Watchlist, Neo4j, CSV, MDE, Graph, Splunk
+Query: |
+  let timeframe = 15m;
+  AuditLogs
+  | where Result == "success"
+  | where OperationName == "Update user"
+  | extend UserPrincipalName = tostring(TargetResources[0].userPrincipalName)
+  | extend modifiedProperties = parse_json(TargetResources[0].modifiedProperties)
+  | mv-expand modifiedProperty = modifiedProperties
+  | extend displayName = tostring(modifiedProperty.displayName),
+                                  oldValue = modifiedProperty.oldValue,
+                                  newValue = modifiedProperty.newValue
+  | project-away modifiedProperties, modifiedProperty
+  | where displayName startswith "Strong"
+  | mv-expand newValue
+  | extend newValues = parse_json(tostring(newValue))[0]
+  | extend MfaAuthenticatorDeviceName = newValues.DeviceName
+  | extend MfaDeviceId = newValues.DeviceId
+  | extend MfaPhoneNumber = newValues.PhoneNumber
+  | extend AuthenticatorFlavor = newValues.AuthenticatorFlavor
+  | extend MfaEmailAddress = newValues.Email
+  | extend DeviceTag = newValues.DeviceTag
+  | where isnotnull(AuthenticatorFlavor) or isnotnull( MfaPhoneNumber)
+  | extend MfaDeviceId=case(MfaDeviceId == "00000000-0000-0000-0000-000000000000","",MfaDeviceId)
+  | extend MfaAuthMethods=case((AuthenticatorFlavor =="Authenticator" and DeviceTag =~ "SoftwareTokenActivated"),"SoftwareOath",
+                              (AuthenticatorFlavor =="Authenticator" and DeviceTag !~ "SoftwareTokenActivated"),"MicrosoftAuthenticator",
+                              (isnotempty(MfaPhoneNumber)),"Phone",
+                              (isnotempty(MfaEmailAddress)),"Email",
+                              "Unknown" )
+  | project UserPrincipalName=toupper(UserPrincipalName), UserId=toupper(TargetResources[0].id), MfaAuthenticatorDeviceName,MfaPhoneNumber, MfaAuthMethods, MfaDeviceId=toupper(MfaDeviceId), MfaEmailAddress=toupper(MfaEmailAddress)
+Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH toUpper($objectid) as objectid, $MfaAuthMethods as MfaAuthMethods, $MfaPhoneNumber as MfaPhoneNumber,$MfaAuthenticatorDeviceName as MfaAuthenticatorDeviceName, toUpper($MfaDeviceId) as MfaDeviceId, $MfaEmailAddress as MfaEmailAddress
+      MATCH (t {objectid: objectid})
+      SET t.MfaAuthMethods = (CASE WHEN NOT MfaAuthMethods IN coalesce(t.MfaAuthMethods, []) THEN coalesce(t.MfaAuthMethods, []) + [MfaAuthMethods] ELSE t.MfaAuthMethods END)
+      SET t.MfaPhoneNumber = MfaPhoneNumber, t.MfaAuthenticatorDeviceName = MfaAuthenticatorDeviceName, t.MfaDeviceId = MfaDeviceId, t.MfaEmailAddress = MfaEmailAddress
+    Parameters:
+      objectid: UserId
+      MfaAuthMethods: MfaAuthMethods
+      MfaPhoneNumber: MfaPhoneNumber
+      MfaEmailAddress: MfaEmailAddress
+      MfaAuthenticatorDeviceName: MfaAuthenticatorDeviceName
+      MfaDeviceId: MfaDeviceId

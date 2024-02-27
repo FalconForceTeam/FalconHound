@@ -1,0 +1,15 @@
+Name: CLEANUP - Remove the MFA Device Sharing edge
+ID: N4J_CLN_Remove_MFADeviceSharing
+Description: Removes the MFA Device Sharing edge from the graph if the nodes do not share the same device
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+    MATCH (u1:AZUser)-[r:MfaDeviceSharing]-(u2:AZUser)
+    WHERE u1.MfaAuthenticatorDeviceId IS NOT NULL AND u2.MfaAuthenticatorDeviceId IS NOT NULL
+    AND u1.MfaAuthenticatorDeviceId <> u2.MfaAuthenticatorDeviceId
+    DELETE r
+Targets: []
