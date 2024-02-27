@@ -9,7 +9,6 @@ import (
 	"github.com/microsoftgraph/msgraph-beta-sdk-go/models"
 	graphusers "github.com/microsoftgraph/msgraph-beta-sdk-go/users"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
-	"strings"
 )
 
 func GetMFA(graphClient msgraphsdk.GraphServiceClient) ([]byte, error) {
@@ -21,7 +20,7 @@ func GetMFA(graphClient msgraphsdk.GraphServiceClient) ([]byte, error) {
 	type MFASettings struct {
 		SignInPreference        string
 		AuthMethods             []string
-		MfaAuthMethods          string
+		MfaAuthMethods          []string
 		PhoneNumber             string
 		SmsSignInState          string
 		HelloDevice             string
@@ -127,7 +126,8 @@ func GetMFA(graphClient msgraphsdk.GraphServiceClient) ([]byte, error) {
 				settings.MfaEmailAddress = *emailData[0].GetEmailAddress()
 			}
 			// add the auth methods to a single string for easier ingestion into neo4j
-			settings.MfaAuthMethods = strings.Join(settings.AuthMethods, ",")
+			//settings.MfaAuthMethods = strings.Join(settings.AuthMethods, ",")
+			settings.MfaAuthMethods = settings.AuthMethods
 		}
 		mfaSettingsPerUser = append(mfaSettingsPerUser, settings)
 		return true
