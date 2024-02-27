@@ -11,6 +11,9 @@ require (
 	github.com/elastic/go-elasticsearch/v8 v8.12.0
 	github.com/gamepat/azure-oauth2-token v0.2.0
 	github.com/iancoleman/orderedmap v0.3.0
+	github.com/microsoft/kiota-abstractions-go v1.5.6
+	github.com/microsoftgraph/msgraph-beta-sdk-go v0.94.0
+	github.com/microsoftgraph/msgraph-sdk-go-core v1.0.2
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.7
 	github.com/santhosh-tekuri/jsonschema v1.2.4
 	github.com/spf13/viper v1.18.2
@@ -46,15 +49,12 @@ require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-ieproxy v0.0.11 // indirect
-	github.com/microsoft/kiota-abstractions-go v1.5.6 // indirect
 	github.com/microsoft/kiota-authentication-azure-go v1.0.2 // indirect
 	github.com/microsoft/kiota-http-go v1.3.0 // indirect
 	github.com/microsoft/kiota-serialization-form-go v1.0.0 // indirect
 	github.com/microsoft/kiota-serialization-json-go v1.0.6 // indirect
 	github.com/microsoft/kiota-serialization-multipart-go v1.0.0 // indirect
 	github.com/microsoft/kiota-serialization-text-go v1.0.0 // indirect
-	github.com/microsoftgraph/msgraph-beta-sdk-go v0.94.0 // indirect
-	github.com/microsoftgraph/msgraph-sdk-go-core v1.0.2 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
@@ -66,7 +66,6 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
-	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/std-uritemplate/std-uritemplate/go v0.0.50 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
@@ -74,7 +73,6 @@ require (
 	go.opentelemetry.io/otel v1.23.1 // indirect
 	go.opentelemetry.io/otel/metric v1.23.1 // indirect
 	go.opentelemetry.io/otel/trace v1.23.1 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a // indirect
