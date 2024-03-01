@@ -41,7 +41,7 @@ Targets:                                                   # Targets are the pla
     Enabled: true
     Query: |
       WITH toUpper($objectid) as objectid, $MfaAuthMethods as MfaAuthMethods, $MfaPhoneNumber as MfaPhoneNumber,$MfaAuthenticatorDeviceName as MfaAuthenticatorDeviceName, toUpper($MfaDeviceId) as MfaDeviceId, $MfaEmailAddress as MfaEmailAddress
-      MATCH (t {objectid: objectid})
+      MATCH (t:AZUser {objectid: objectid})
       SET t.MfaAuthMethods = (CASE WHEN NOT MfaAuthMethods IN coalesce(t.MfaAuthMethods, []) THEN coalesce(t.MfaAuthMethods, []) + [MfaAuthMethods] ELSE t.MfaAuthMethods END)
       SET t.MfaPhoneNumber = MfaPhoneNumber, t.MfaAuthenticatorDeviceName = MfaAuthenticatorDeviceName, t.MfaDeviceId = MfaDeviceId, t.MfaEmailAddress = MfaEmailAddress
     Parameters:
