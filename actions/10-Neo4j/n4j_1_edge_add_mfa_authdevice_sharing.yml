@@ -1,4 +1,4 @@
-Name: EDGE - Add MFA AuthenticatorDevice Sharing edges
+Name: EDGE - Add MFA Authenticator Device Sharing edges
 ID: N4J_EDGE_ADD_MFAAUTHDEVICE_SHARING
 Description: Checks for accounts with the same MFA Authenticator device and adds a MfaDeviceSharing edge.
 Author: FalconForce

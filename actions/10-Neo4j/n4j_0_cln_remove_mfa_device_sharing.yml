@@ -1,5 +1,5 @@
 Name: CLEANUP - Remove the MFA Device Sharing edge
-ID: N4J_CLN_Remove_MFADeviceSharing
+ID: N4J_CLN_Remove_MFA_Device_Sharing
 Description: Removes the MFA Device Sharing edge from the graph if the nodes do not share the same device
 Author: FalconForce
 Version: '1.0'

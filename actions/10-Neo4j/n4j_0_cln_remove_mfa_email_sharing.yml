@@ -1,0 +1,15 @@
+Name: CLEANUP - Remove the MFA Email Sharing edge
+ID: N4J_CLN_Remove_MFA_EMAIL_Sharing
+Description: Removes the MFA Email edge from the graph if the nodes do not share the same address
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+    MATCH (u1:AZUser)-[r:MfaEmailSharing]-(u2:AZUser)
+    WHERE u1.MfaEmailAddress IS NOT NULL AND u2.MfaEmailAddress IS NOT NULL
+    AND u1.MfaEmailAddress <> u2.MfaEmailAddress
+    DELETE r
+Targets: []
