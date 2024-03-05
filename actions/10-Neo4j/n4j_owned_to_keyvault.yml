@@ -8,7 +8,7 @@ Active: true                 # Enable to run this action
 Debug: false                   # Enable to see query results in the console
 SourcePlatform: Neo4j 
 Query: |
-  MATCH (u {owned: true})-[r]->(g:AZKeyVault) 
+  MATCH (u {owned: true})-[*1..]->(g:AZKeyVault) 
   WITH u.Name as Name, COUNT(g.Name) as KeyVaultCount, COLLECT(g.Name) as KeyVaults
   RETURN {Name: Name, KeyVaultCount: KeyVaultCount, KeyVaults: KeyVaults} as info
 Targets:
