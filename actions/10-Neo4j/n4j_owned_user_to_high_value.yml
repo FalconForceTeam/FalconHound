@@ -8,7 +8,8 @@ Active: true                 # Enable to run this action
 Debug: false                   # Enable to see query results in the console
 SourcePlatform: Neo4j 
 Query: |
-  MATCH (x:Group{highvalue:true})
+  MATCH (x:Group)
+  WHERE (coalesce(x.system_tags,"") CONTAINS "admin_tier_0" or x.highvalue=true)
   WITH  x.objectid as ObjectID, x.name as Name
   MATCH (y:Group {objectid:ObjectID})
   MATCH (u:User {owned:true})
