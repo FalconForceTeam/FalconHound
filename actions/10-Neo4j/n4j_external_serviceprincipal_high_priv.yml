@@ -8,17 +8,21 @@ Active: false                 # Enable to run this action
 Debug: false                   # Enable to see query results in the console
 SourcePlatform: Neo4j 
 Query: |
+  MATCH (t:AZTenant) 
+  WITH t.tenantid as TENANTID
   MATCH p=(s)-[:AZContributor|AZMGGrantAppRoles|AZPrivilegedRoleAdmin|AZMGAddOwner|AZMGApplication_ReadWrite_All|AZMGDirectory_ReadWrite_All|AZMGRoleManagement_ReadWrite_Directory|AZUserAccessAdministrator|AZOwner|AZMGGrantRole|AZMGAddMember|AZMGAddOwner|AZMGAddSecret|AZHasRole|AZMemberOf|HasConsent|AZResetPassword*1..]->(r:AZRole)
   WHERE (coalesce(s.system_tags,"") CONTAINS "admin_tier_0" or s.highvalue=true)
-  AND NOT toUpper(s.appownerorganizationid) = "TENANT_ID"
+  AND NOT toUpper(s.appownerorganizationid) = TENANTID
   AND s.appownerorganizationid CONTAINS "-"
   RETURN {SPName:s.name,Roles:COLLECT(r.name), Count:COUNT(r.name)} as info
 Targets:
   - Name: Sentinel
     Enabled: true
     BHQuery: |
+      MATCH (t:AZTenant) 
+      WITH t.tenantid as TENANTID
       MATCH p=(s)-[:AZContributor|AZMGGrantAppRoles|AZPrivilegedRoleAdmin|AZMGAddOwner|AZMGApplication_ReadWrite_All|AZMGDirectory_ReadWrite_All|AZMGRoleManagement_ReadWrite_Directory|AZUserAccessAdministrator|AZOwner|AZMGGrantRole|AZMGAddMember|AZMGAddOwner|AZMGAddSecret|AZHasRole|AZMemberOf|HasConsent|AZResetPassword*1..]->(r:AZRole)
       WHERE (coalesce(s.system_tags,"") CONTAINS "admin_tier_0" or s.highvalue=true)
-      AND NOT toUpper(s.appownerorganizationid) = "TENANT_ID"
+      AND NOT toUpper(s.appownerorganizationid) = TENANTID
       AND s.appownerorganizationid CONTAINS "-"
       RETURN *
