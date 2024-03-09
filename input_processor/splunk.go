@@ -42,6 +42,10 @@ type SplunkProcessor struct {
 }
 
 func (m *SplunkProcessor) ExecuteQuery() (internal.QueryResults, error) {
+	if m.Credentials.SplunkApiToken == "" {
+		return internal.QueryResults{}, fmt.Errorf("SplunkApiToken is empty, skipping..")
+	}
+
 	results, err := QuerySplunk(m.Query, m.Credentials, m.Debug)
 	if err != nil {
 		if strings.Contains(err.Error(), "unexpected HTTP status code: 400") {

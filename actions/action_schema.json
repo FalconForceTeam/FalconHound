@@ -33,8 +33,10 @@
                 "Neo4j",
                 "BloodHound",
                 "MSGraph",
+                "MSGraphApi",
                 "Splunk",
-                "LogScale"
+                "LogScale",
+                "Elastic"
             ]
         },
         "Version": {
@@ -57,7 +59,9 @@
                             "BloodHound",
                             "BHSession",
                             "LogScale",
-                            "ADX"
+                            "ADX",
+                            "LimaCharlie",
+                            "Markdown"
                         ]
                     },
                     "Enabled": {
@@ -70,6 +74,32 @@
                             "properties": {
                                 "Name": {
                                     "const": "CSV"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                },
+                                "Path": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "Path"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "MarkDown"
                                 }
                             }
                         },
@@ -150,7 +180,7 @@
                         "if": {
                             "properties": {
                                 "Name": {
-                                    "const": "AXD"
+                                    "const": "ADX"
                                 }
                             }
                         },
@@ -167,6 +197,9 @@
                                 },
                                 "Enabled": {
                                     "type": "boolean"
+                                },
+                                "BatchSize" : {
+                                    "type": "integer"
                                 }
                             },
                             "additionalProperties": false

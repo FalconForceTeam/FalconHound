@@ -39,6 +39,10 @@ type MDESession struct {
 var _MDESession MDESession
 
 func (m *MDEProcessor) ExecuteQuery() (internal.QueryResults, error) {
+	if m.Credentials.MDEAppSecret == "" {
+		return internal.QueryResults{}, fmt.Errorf("MDEAppSecret is empty, skipping..")
+	}
+
 	if !_MDESession.initialized {
 		_MDESession.token = MDEToken(m.Credentials)
 		_MDESession.initialized = true

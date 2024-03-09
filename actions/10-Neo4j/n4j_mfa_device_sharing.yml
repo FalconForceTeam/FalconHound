@@ -1,0 +1,25 @@
+Name: MFA AuthenticatorDevice Sharing
+ID: N4J_MFA_DEVICE_SHARING
+Description: MFA AuthenticatorDevice Sharing
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (u:AZUser)
+  WHERE u.MfaAuthenticatorDeviceId IS NOT NULL AND u.MfaAuthenticatorDeviceId <> ''
+  WITH u.MfaAuthenticatorDeviceId AS deviceId, u.MfaAuthenticatorDeviceName as deviceName, collect(u.name) AS userNames, COUNT(u) AS UserCount
+  WHERE UserCount > 1
+  RETURN {DeviceId: deviceId, DeviceName: deviceName ,UserNames: userNames, UserCount: UserCount} AS info
+  ORDER BY UserCount DESC
+Targets:
+  - Name: Sentinel
+    Enabled: true
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_MFA_Shared_AuthenticatorDevice_Users
+    DisplayName: MFA Shared AuthenticatorDevice Users
+    SearchKey: DeviceId
+    Overwrite: true

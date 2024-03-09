@@ -3,6 +3,7 @@ package cmd
 import (
 	"falconhound/internal"
 	"log"
+	"path/filepath"
 	"reflect"
 
 	"github.com/spf13/viper"
@@ -19,8 +20,15 @@ func setCredValue(credentials *internal.Credentials, field string, value string)
 func GetCreds(configFile string, keyvaultFlag bool) (theCreds internal.Credentials) {
 	var err error
 	//read config file
-	viper.SetConfigName(configFile)
-	viper.AddConfigPath(".")
+	dir := filepath.Dir(configFile)
+	fileName := filepath.Base(configFile)
+
+	viper.SetConfigName(fileName)
+	if configFile == "config.yml" {
+		viper.AddConfigPath(".")
+	} else {
+		viper.AddConfigPath(dir)
+	}
 	viper.SetConfigType("yml")
 
 	if err := viper.ReadInConfig(); err != nil {

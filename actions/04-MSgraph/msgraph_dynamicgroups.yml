@@ -1,0 +1,37 @@
+Name: Get Dynamic Groups
+ID: GRAPH_DynamicGroups
+Description: Get Dynamic Groups and their rules. Requires Directory.Read.All permissions
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: true                  # Enable to see query results in the console
+SourcePlatform: MSGraphApi          # Sentinel, Watchlist, Neo4j, MDE, Graph, Splunk
+Query: |
+  GetDynamicGroups
+Targets:   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH toUpper($objectid) as objectid, toUpper($displayname) as name, $membershiprule as membershiprule, $membershiprulestate as membershiprulestate, $grouptype as grouptype, $displayname as displayname, $tenantid as tenantid
+      MERGE (x:AZBase {objectid:objectid})
+      SET x:AZGroup, x+={
+      name: name,
+      tenantid: tenantid,
+      objectid: objectid,
+      displayname: displayname,
+      falconhound:True,
+      memebershiprule: membershiprule,
+      membershiprulestate: membershiprulestate,
+      grouptype: grouptype
+      }
+    Parameters:
+      objectid: ObjectId
+      grouptype: GroupType
+      membershiprule: MembershipRule
+      membershiprulestate: MembershipRuleProcessingState
+      displayname: DisplayName
+      tenantid: TenantId
+  - Name: Markdown
+    Enabled: false
+    Path: report/TEST/oauth.md

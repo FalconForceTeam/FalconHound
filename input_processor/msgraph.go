@@ -36,6 +36,10 @@ type MSGraphResults struct {
 var _MSGraphSession MSGraphSession
 
 func (m *MSGraphProcessor) ExecuteQuery() (internal.QueryResults, error) {
+	if m.Credentials.GraphAppSecret == "" {
+		return internal.QueryResults{}, fmt.Errorf("GraphAppSecret is empty, skipping..")
+	}
+
 	if !_MSGraphSession.initialized {
 		_MSGraphSession.token = graphToken(m.Credentials)
 		_MSGraphSession.initialized = true

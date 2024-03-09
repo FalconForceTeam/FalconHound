@@ -184,6 +184,17 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				Path: target.Path,
 			},
 		}, nil
+	case "Markdown":
+		return &output_processor.MDOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.MDOutputConfig{
+				Path:             target.Path,
+				QueryName:        query.Name,
+				QueryDescription: query.Description,
+				QueryEventID:     query.ID,
+				QueryDate:        time.Now().Format("2006-01-02"),
+			},
+		}, nil
 	case "Sentinel":
 		return &output_processor.SentinelOutputProcessor{
 			OutputProcessor: &baseOutput,
@@ -203,12 +214,23 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				QueryEventID:     query.ID,
 				BHQuery:          target.BHQuery,
 				Table:            target.Table,
+				BatchSize:        target.BatchSize,
 			},
 		}, nil
 	case "Splunk":
 		return &output_processor.SplunkOutputProcessor{
 			OutputProcessor: &baseOutput,
 			Config:          output_processor.SplunkOutputConfig{},
+		}, nil
+	case "LimaCharlie":
+		return &output_processor.LimaCharlieOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.LimaCharlieOutputConfig{
+				QueryName:        query.Name,
+				QueryDescription: query.Description,
+				QueryEventID:     query.ID,
+				BHQuery:          target.BHQuery,
+			},
 		}, nil
 	case "Neo4j":
 		return &output_processor.Neo4jOutputProcessor{
@@ -277,6 +299,11 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 			InputProcessor: &baseProcessor,
 			Config:         input_processor.MSGraphConfig{},
 		}, nil
+	case "MSGraphApi":
+		return &input_processor.MsGraphApiProcessor{
+			InputProcessor: &baseProcessor,
+			Config:         input_processor.MsGraphApiConfig{},
+		}, nil
 	case "Splunk":
 		return &input_processor.SplunkProcessor{
 			InputProcessor: &baseProcessor,
@@ -286,6 +313,11 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 		return &input_processor.LogScaleProcessor{
 			InputProcessor: &baseProcessor,
 			Config:         input_processor.LogScaleConfig{},
+		}, nil
+	case "Elastic":
+		return &input_processor.ElasticProcessor{
+			InputProcessor: &baseProcessor,
+			Config:         input_processor.ElasticConfig{},
 		}, nil
 	default:
 		return nil, fmt.Errorf("source platform %q not supported", query.SourcePlatform)

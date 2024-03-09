@@ -30,4 +30,12 @@ Targets:                    # Targets are the platforms that this action will pu
     DisplayName: MDE Exploitable Machines
     SearchKey: DeviceName
     Overwrite: true       # Overwrite the watchlist with the query results, when false it will append the results to the watchlist
+  - Name: ADX
+    Enabled: true
+    Table: FalconHound
+    BatchSize: 1000   # Number of records to push to ADX in one batch, these will show up in the ADX table as 1 row with an array of values
+  - Name: Markdown
+    Enabled: true
+    Path: reports/{{date}}/get_sessions_mde.md
+
 

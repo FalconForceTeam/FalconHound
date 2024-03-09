@@ -7,9 +7,10 @@ output/*.csv
 bin/*
 configs/*
 .vscode/*
-actionsTEST/*
+client_actions/*/*
 falconhound
 dist/*
 .goreleaser.yaml
 cache.db
 .idea/*
+report/*/*

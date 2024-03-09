@@ -5,7 +5,10 @@ import (
 	"falconhound/internal"
 	"fmt"
 	"os"
+	"reflect"
 	"sort"
+	"strings"
+	"time"
 )
 
 type CSVOutputConfig struct {
@@ -29,6 +32,13 @@ func (m *CSVOutputProcessor) ProduceOutput(QueryResults internal.QueryResults) e
 
 // WriteCSV writes the results to a CSV file
 func WriteCSV(results internal.QueryResults, path string) error {
+	//replace {{date}} with the current date if it exists
+	path = strings.Replace(path, "{{date}}", time.Now().Format("2006-01-02"), 2)
+	// create the folder if it doesn't exist
+	err := os.MkdirAll(path[:strings.LastIndex(path, "/")], 0755)
+	if err != nil {
+		return fmt.Errorf("failed creating folder: %w", err)
+	}
 	// Create a file for writing
 	csvFile, err := os.Create(path)
 	if err != nil {
@@ -57,6 +67,20 @@ func WriteCSV(results internal.QueryResults, path string) error {
 			v, ok := record[k]
 			if !ok {
 				v = nil
+			}
+			// Check if the value is a slice
+			if reflect.TypeOf(v).Kind() == reflect.Slice {
+				// Check if the slice elements are of type string
+				if reflect.TypeOf(v).Elem().Kind() == reflect.String {
+					v = strings.Join(v.([]string), ", ")
+				} else if reflect.TypeOf(v).Elem().Kind() == reflect.Interface {
+					// Handle the case where the slice elements are of type interface{}
+					var strSlice []string
+					for _, elem := range v.([]interface{}) {
+						strSlice = append(strSlice, fmt.Sprintf("%v", elem))
+					}
+					v = strings.Join(strSlice, ", ")
+				}
 			}
 			row = append(row, fmt.Sprintf("%v", v))
 		}

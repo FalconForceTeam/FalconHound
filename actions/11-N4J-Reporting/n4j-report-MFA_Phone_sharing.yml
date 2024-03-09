@@ -1,0 +1,23 @@
+Name: MFA Phone Sharing
+ID: N4J_REPORT_MFA_PHONE_SHARING
+Description: MFA Phone Sharing
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (u:AZUser)
+  WHERE u.MfaPhoneNumber IS NOT NULL AND u.MfaPhoneNumber <> ''
+  WITH u.MfaPhoneNumber AS phoneNumber, collect(u.name) AS userNames, COUNT(u) AS UserCount
+  WHERE UserCount > 1
+  RETURN {PhoneNumber: phoneNumber, UserNames: userNames, UserCount: UserCount} AS info
+  ORDER BY UserCount DESC
+Targets:
+  - Name: CSV
+    Enabled: true
+    Path: report/{{date}}/BH-MFA_PHONE_SHARING_{{date}}.csv
+  - Name: Markdown
+    Enabled: true
+    Path: report/{{date}}/BH-MFA_PHONE_SHARING_{{date}}.md

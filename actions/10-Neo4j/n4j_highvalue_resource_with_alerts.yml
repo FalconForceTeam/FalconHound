@@ -1,0 +1,26 @@
+Name: High value resource with alerts
+ID: N4J_Highvalue_Resource_with_alerts
+Description: Searches for TIER0 or high value nodes with alerts
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (n {owned:true})
+  WHERE (coalesce(n.system_tags,"") CONTAINS "admin_tier_0" or n.highvalue=true)
+  RETURN {Name: n.name, AlertIds: n.alertid, Description:n.description, NodeType:HEAD([label IN LABELS(n) WHERE label <> "base"])} as info
+Targets:
+  - Name: Sentinel
+    Enabled: true
+    BHQuery: |
+        MATCH (n {owned:true})
+        WHERE (coalesce(n.system_tags,"") CONTAINS "admin_tier_0" or n.highvalue=true)
+        RETURN n
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_HighValue_Resource_with_alerts
+    DisplayName: HighValue Resource with Alerts
+    SearchKey: Name
+    Overwrite: true

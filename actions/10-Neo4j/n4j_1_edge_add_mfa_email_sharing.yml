@@ -1,0 +1,20 @@
+Name: EDGE - Add MFA Email Address Sharing edges
+ID: N4J_EDGE_ADD_MFA_EMAIL_SHARING
+Description: Checks for accounts with the same MFA email address and adds a MfaEmailSharing edge.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+    MATCH (user1:AZUser)
+    WHERE user1.MfaEmailAddress IS NOT NULL AND  user1.MfaEmailAddress <> ""
+    WITH user1.MfaEmailAddress AS device, COLLECT(user1) AS users
+    UNWIND users AS u1
+    UNWIND users AS u2
+    WITH u1, u2
+    WHERE id(u1) < id(u2)
+    MERGE (u1)-[r:MfaEmailSharing]-(u2)
+    SET r.enforced = false
+Targets: []

@@ -30,6 +30,9 @@ func (m *BHProcessor) ExecuteQuery() (internal.QueryResults, error) {
 }
 
 func BHRequest(query string, creds internal.Credentials) (internal.QueryResults, error) {
+	if creds.BHTokenKey == "" {
+		return internal.QueryResults{}, fmt.Errorf("BHTokenKey is empty, skipping..")
+	}
 
 	// Convert query from a multiline string from the yaml to a single line string so the API can parse it
 	query = strings.ReplaceAll(query, "\n", " ")

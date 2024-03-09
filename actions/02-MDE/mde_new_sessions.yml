@@ -18,7 +18,7 @@ Query: |
     | where LogonType !in ("Network","Service")
     | where isnotempty(AccountSid)
     | where not(AccountSid matches regex excludeSid)
-    | extend ComputerName = toupper(DeviceName), DomainName = strcat(tostring(split(DeviceName, '.')[-2]), '.', tostring(split(DeviceName, '.')[-1]))
+    | extend DeviceName = toupper(DeviceName), DomainName = strcat(tostring(split(DeviceName, '.')[-2]), '.', tostring(split(DeviceName, '.')[-1]))
     | summarize Timestamp=min(Timestamp) by DeviceName,AccountSid,AccountName,AccountDomain, LogonType
 # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
 Targets:
@@ -36,7 +36,3 @@ Targets:
     DisplayName: MDE Sessions
     SearchKey: AccountName
     Overwrite: true
-  - Name: BHSession 
-    Enabled: false            # Experimental
-    BatchSize: 100
-    

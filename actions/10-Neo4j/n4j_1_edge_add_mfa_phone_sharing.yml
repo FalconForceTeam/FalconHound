@@ -1,0 +1,20 @@
+Name: EDGE - Add MFA Phone Sharing edges
+ID: N4J_EDGE_ADD_MFAPHONESHARING
+Description: Checks for accounts with the same MFA PhoneNumber and adds a MfaPhoneSharing edge.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+    MATCH (user1:AZUser)
+    WHERE user1.MfaPhoneNumber IS NOT NULL AND user1.MfaPhoneNumber <> ""
+    WITH user1.MfaPhoneNumber AS phoneNumber, COLLECT(user1) AS users
+    UNWIND users AS u1
+    UNWIND users AS u2
+    WITH u1, u2
+    WHERE id(u1) < id(u2)
+    MERGE (u1)-[r:MfaPhoneSharing]-(u2)
+    SET r.enforced = false
+Targets: []

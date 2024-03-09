@@ -5,7 +5,7 @@ Author: FalconForce
 Version: '1.0'
 Info: |-
 Active: true                 # Enable to run this action
-Debug: true                  # Enable to see query results in the console
+Debug: false                  # Enable to see query results in the console
 SourcePlatform: MSGraph          # Sentinel, Watchlist, Neo4j, MDE, Graph, Splunk
 Query: |
   /beta/roleManagement/directory/roleEligibilitySchedules

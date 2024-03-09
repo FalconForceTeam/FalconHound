@@ -11,7 +11,7 @@ Query: |
   let timeframe = 15m;
   AuditLogs
   | where ingestion_time() >= ago(timeframe)
-  | where OperationName startswith "Add member to role"
+  | where OperationName =~ "Add member to role"
   | extend TargetResources=parse_json(TargetResources)
   | extend ObjectId = TargetResources.[0].id, userPrincipalName=TargetResources.[0].userPrincipalName, modifiedProperties=TargetResources.[0].modifiedProperties
   | extend RoleObjectId = tostring(modifiedProperties[0].newValue),TenantId=AADTenantId

@@ -33,6 +33,10 @@ type SentinelResults struct {
 }
 
 func (m *SentinelProcessor) ExecuteQuery() (internal.QueryResults, error) {
+	if m.Credentials.SentinelAppSecret == "" {
+		return internal.QueryResults{}, fmt.Errorf("SentinelAppSecret is empty, skipping..")
+	}
+
 	results, err := LArunQuery(m.Query, m.Credentials)
 	if err != nil {
 		if strings.Contains(err.Error(), "unexpected HTTP status code: 400") {
