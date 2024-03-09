@@ -36,8 +36,3 @@ Targets:
     DisplayName: MDE Sessions
     SearchKey: AccountName
     Overwrite: true
-  - Name: BloodHound
-    Enabled: false            # Experimental
-    BatchSize: 100
-    OutputType: Session
-    
