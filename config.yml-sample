@@ -76,6 +76,13 @@ logscale:
   repository:
 
 ################################################
+# Add your Elastic cloud connection information here 
+################################################
+elastic:
+  cloudid: 
+  apikey: 
+
+################################################
 # Add your Azure Data Explorer connection information here
 # This can be the same app as Sentinel or a different one
 ################################################
