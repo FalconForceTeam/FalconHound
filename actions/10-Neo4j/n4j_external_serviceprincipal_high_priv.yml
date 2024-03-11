@@ -4,7 +4,7 @@ Description: This action lists all externally owned Service Principals with high
 Author: FalconForce
 Version: '1.0'
 Info: More information about the potential impact here > https://posts.specterops.io/microsoft-breach-how-can-i-see-this-in-bloodhound-33c92dca4c65
-Active: false                 # Enable to run this action
+Active: true                 # Enable to run this action
 Debug: false                   # Enable to see query results in the console
 SourcePlatform: Neo4j 
 Query: |
@@ -25,4 +25,10 @@ Targets:
       WHERE (coalesce(s.system_tags,"") CONTAINS "admin_tier_0" or s.highvalue=true)
       AND NOT toUpper(s.appownerorganizationid) = TENANTID
       AND s.appownerorganizationid CONTAINS "-"
-      RETURN *
+      RETURN p
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_Azure_EXT_SP_HIGH_PRIV
+    DisplayName: Azure External SP High Privileges
+    SearchKey: SPName
+    Overwrite: true
