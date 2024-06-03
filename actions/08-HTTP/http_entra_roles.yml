@@ -1,4 +1,4 @@
-Name: Get tier0 entra roles
+Name: Get Entra admin tier roles
 ID: HTTP_Entra_Roles
 Description: Get all roles from Entra and create a relationship between the role and the user in Neo4j.
 Author: FalconForce
