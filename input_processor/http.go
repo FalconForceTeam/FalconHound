@@ -74,22 +74,6 @@ func (m *HTTPProcessor) ExecuteQuery() (internal.QueryResults, error) {
 		"2": "admin_tier_2",
 	}
 
-	//roleMap := make(map[string]RoleMap)
-	//for _, role := range roles {
-	//	roleMap[role.RoleId] = RoleMap{
-	//		RoleId:               role.RoleId,
-	//		EAMTierLevelTagValue: role.Classification.EAMTierLevelTagValue,
-	//		AdminTierLevel:       EAMTierLevelTagValueAlias[role.Classification.EAMTierLevelTagValue],
-	//		TenantId:             m.Credentials.SentinelTenantID,
-	//	}
-	//}
-	//
-	//roleMapJson, err := json.Marshal(roleMap)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return nil, fmt.Errorf("failed to marshal role map")
-	//
-	//}
 	roleMaps := make([]RoleMap, 0)
 
 	for _, role := range roles {
@@ -101,32 +85,6 @@ func (m *HTTPProcessor) ExecuteQuery() (internal.QueryResults, error) {
 		})
 	}
 
-	// Now marshal the slice, not the map
-	//roleMapJson, err := json.Marshal(roleMaps)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return nil, fmt.Errorf("failed to marshal role map")
-	//}
-
-	//println(string(roleMapJson))
-	//results := internal.QueryResults{
-	//	{
-	//		"Results": roleMapJson,
-	//	},
-	//}
-
-	//results := internal.QueryResults{}
-	//for _, roleMap := range roleMaps {
-	//	roleMapJson, err := json.Marshal(roleMap)
-	//	if err != nil {
-	//		fmt.Println(err)
-	//		return nil, fmt.Errorf("failed to marshal role map")
-	//	}
-	//	results = append(results, map[string]interface{}{
-	//		"Results": string(roleMapJson),
-	//	})
-	//}
-	//results := make([]string, 0)
 	results := internal.QueryResults{}
 
 	for _, roleMap := range roleMaps {
