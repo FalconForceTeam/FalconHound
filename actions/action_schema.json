@@ -36,7 +36,8 @@
                 "MSGraphApi",
                 "Splunk",
                 "LogScale",
-                "Elastic"
+                "Elastic",
+                "HTTP"
             ]
         },
         "Version": {
@@ -61,7 +62,8 @@
                             "LogScale",
                             "ADX",
                             "LimaCharlie",
-                            "Markdown"
+                            "Markdown",
+                            "JSON"
                         ]
                     },
                     "Enabled": {

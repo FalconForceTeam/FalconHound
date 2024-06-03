@@ -5,7 +5,7 @@ Author: FalconForce
 Version: '1.0'
 Info: |-
 Active: true                 # Enable to run this action
-Debug: true                  # Enable to see query results in the console
+Debug: false                  # Enable to see query results in the console
 SourcePlatform: MSGraphApi          # Sentinel, Watchlist, Neo4j, MDE, Graph, Splunk
 Query: |
   GetDynamicGroups
@@ -21,7 +21,7 @@ Targets:   # Targets are the platforms that this action will push to (CSV, Neo4j
       objectid: objectid,
       displayname: displayname,
       falconhound:True,
-      memebershiprule: membershiprule,
+      membershiprule: membershiprule,
       membershiprulestate: membershiprulestate,
       grouptype: grouptype
       }

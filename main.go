@@ -184,6 +184,13 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				Path: target.Path,
 			},
 		}, nil
+	case "JSON":
+		return &output_processor.JSONOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.JSONOutputConfig{
+				Path: target.Path,
+			},
+		}, nil
 	case "Markdown":
 		return &output_processor.MDOutputProcessor{
 			OutputProcessor: &baseOutput,
@@ -236,6 +243,14 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 		return &output_processor.Neo4jOutputProcessor{
 			OutputProcessor: &baseOutput,
 			Config: output_processor.Neo4jOutputConfig{
+				Parameters: target.Parameters,
+				Query:      target.Query,
+			},
+		}, nil
+	case "BloodHound":
+		return &output_processor.BloodHoundOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.BloodHoundOutputConfig{
 				Parameters: target.Parameters,
 				Query:      target.Query,
 			},
@@ -318,6 +333,11 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 		return &input_processor.ElasticProcessor{
 			InputProcessor: &baseProcessor,
 			Config:         input_processor.ElasticConfig{},
+		}, nil
+	case "HTTP":
+		return &input_processor.HTTPProcessor{
+			InputProcessor: &baseProcessor,
+			Config:         input_processor.HTTPConfig{},
 		}, nil
 	default:
 		return nil, fmt.Errorf("source platform %q not supported", query.SourcePlatform)

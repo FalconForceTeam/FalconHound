@@ -18,9 +18,9 @@ Query: |
     | extend FQDN2=strcat(HostName,".",DnsDomain)  // Sometimes the FQDN is not populated for some reason, so we can fix most this way.
     | extend EntityName=iff(isnotempty(FQDN),FQDN,FQDN2)
     | project EntityName,AlertId=VendorOriginalId,Entitytype,ProviderName, Status
-    | summarize make_set(AlertId) by Entitytype,EntityName,Status, ProviderName
-    // | where not((Entitytype == 'host' and EntityName !contains '.') or EntityName endswith ".")  // Optional. Filters non-domain joined hosts and incomplete hostnames.
-    | mv-expand set_AlertId 
+    | summarize make_set(AlertId) by Entitytype,DeviceName=EntityName,Status, ProviderName
+    //| where not((Entitytype == 'host' and EntityName !contains '.') or EntityName endswith ".")  // Optional. Filters non-domain joined hosts and incomplete hostnames.
+    | mv-expand set_AlertId
 Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
   - Name: Neo4j
     Enabled: true
@@ -32,5 +32,5 @@ Targets:                                                   # Targets are the pla
       c.owned = True
     Parameters:
       set_AlertId: set_AlertId
-      EntityName: EntityName
+      EntityName: DeviceName
       Status: Status

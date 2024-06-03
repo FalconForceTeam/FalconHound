@@ -4,7 +4,7 @@ Description: Get per user MFA settings. WARNING, this will be slow. Requires Use
 Author: FalconForce
 Version: '1.0'
 Info: |-
-Active: false  # disabled by default due to the long processing time, enable only when needed, updates can be gathered from logs
+Active: true  # disabled by default due to the long processing time, enable only when needed, updates can be gathered from logs
 Debug: false                  # Enable to see query results in the console
 SourcePlatform: MSGraphApi          # Sentinel, Watchlist, Neo4j, MDE, Graph, Splunk
 Query: |
