@@ -8,7 +8,6 @@ bin/*
 configs/*
 .vscode/*
 client_actions/*/*
-client_actions/action_schema.json
 falconhound
 dist/*
 .goreleaser.yaml
