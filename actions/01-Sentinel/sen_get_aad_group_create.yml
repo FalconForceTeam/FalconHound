@@ -1,0 +1,31 @@
+Name: New groups added to EntraID
+ID: SEN_AAD_Group_Creations
+Description: Gets all group creation events
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                                               # Enable to run this action
+Debug: false                                                 # Enable to see query results in the console
+SourcePlatform: Sentinel                                    # Sentinel, Watchlist, Neo4j, CSV, MDE, Graph, Splunk
+Query: |
+  let timeframe = 15m;
+  AuditLogs
+  | where ingestion_time() >= ago(timeframe)
+  | where OperationName contains "Add group"
+  | mv-expand TargetResources
+  | extend TargetResources=parse_json(TargetResources), InitiatedBy=parse_json(InitiatedBy)
+  | extend ObjectId = TargetResources.id, displayName=TargetResources.displayName, createdBy=InitiatedBy.user.id,creatorUserPrincipalName=InitiatedBy.user.userPrincipalName
+  | project TimeGenerated,ObjectId,displayName,createdBy, creatorUserPrincipalName
+Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH toUpper($ObjectId) AS ObjectId, toUpper($displayName) AS DisplayName, toUpper($createdBy) AS CreatedBy, toUpper($creatorUserPrincipalName) AS CreatorUserPrincipalName, $TimeGenerated AS TimeGenerated
+      MERGE (g:AZGroup {objectid: ObjectId})
+        ON CREATE SET g.displayname = DisplayName, g.createdby = CreatedBy, g.creatoruserprincipalname = CreatorUserPrincipalName, g.source = 'falconhound', g.whencreated = TimeGenerated, g.label = 'AZBase'
+    Parameters:
+      displayName: displayName
+      ObjectId: ObjectId
+      TimeGenerated: TimeGenerated
+      createdBy: createdBy
+      creatorUserPrincipalName: creatorUserPrincipalName
