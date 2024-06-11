@@ -1,0 +1,32 @@
+Name: N4J Azure Tier0 or Tier1 Assigned Roles
+ID: N4j_Azure_Tier0_or_Tier1_Assigned_Roles
+Description: Collects all Azure roles assigned to Tier0 or Tier1 groups and creates a relationship between the role and the entity in Neo4j.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  MATCH (a:AZRole)-[r:HasConsent|AZRunsAs|AZHasRole|AZGlobalAdmin|AZPrivilegedRoleAdmin|AZOwns]-(b) 
+  WHERE (a.system_tags CONTAINS "admin_tier_0" or a.system_tags CONTAINS "admin_tier_1")
+  RETURN {Entity: b.name, Role: a.name, Relation: type(r)} as info
+Targets:
+  - Name: CSV
+    Enabled: false
+    Path: output/azure_tier0_and_tier1_assigned.csv
+  - Name: Sentinel
+    BHQuery: |
+      MATCH b=(a:AZRole)-[r:HasConsent|AZRunsAs|AZHasRole|AZGlobalAdmin|AZPrivilegedRoleAdmin|AZOwns]-() 
+      WHERE (a.system_tags CONTAINS "admin_tier_0" or a.system_tags CONTAINS "admin_tier_1")  
+      RETURN b
+    Enabled: true
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_Azure_Tier0_or_Tier1_Assigned_Roles
+    DisplayName: Azure Tier0 or Tier1 Assigned Roles
+    SearchKey: Entity
+    Overwrite: true
+  - Name: Markdown
+    Enabled: true
+    Path: report/{{date}}/Azure_Tier0_or_Tier1_Assigned_Roles.md

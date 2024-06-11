@@ -31,3 +31,11 @@ Targets:                                                   # Targets are the pla
       Computer: Computer
       TargetUserSid: TargetUserSid
       Timestamp: Timestamp
+  - Name: BloodHound
+    Enabled: false
+    Query: |
+      MATCH (x:Computer {name:$Computer}) MATCH (y:User {objectid:$TargetUserSid}) MERGE (x)-[r:HasSession]->(y) SET r.since=$Timestamp SET r.source='falconhound'
+    Parameters:
+      Computer: Computer
+      TargetUserSid: TargetUserSid
+      Timestamp: Timestamp

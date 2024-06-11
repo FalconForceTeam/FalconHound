@@ -1,0 +1,36 @@
+Name: N4J AD Chokepoints
+ID: N4J_AD_Chokepoints
+Description: This action collects all paths to groups that can control many resources
+Author: FalconForce
+Version: '1.0'
+Info: |
+  Based on a blog by sadprocess0r (https://falconforce.nl/bloodhound-calculating-ad-metrics-0x02/)
+Active: true                 # Enable to run this action
+Debug: false                  # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  CALL {MATCH (allU:User) RETURN COUNT(allU) AS TotalU}
+  CALL {MATCH (allC:Computer) RETURN COUNT(allC) AS TotalC}
+  MATCH (y:Group)
+  CALL {WITH y
+  OPTIONAL MATCH pIN=shortestPath((x:User)-[*1..]->(y)) RETURN x
+  }
+  CALL {WITH y
+  OPTIONAL MATCH pOUT=shortestPath((y)-[*1..]->(z:Computer)) RETURN z
+  }
+  WITH DISTINCT y.name AS Target, TotalU, TotalC,
+  COUNT(DISTINCT(x)) AS CountIN,
+  COUNT(DISTINCT(z)) AS CountOUT
+  WHERE CountOUT > 0 AND CountIN > 0
+  RETURN {Target:Target,
+  CountIn:CountIN, TotalUsers:TotalU, PercentIn:round(CountIN/toFloat(TotalU)*100,1),
+  CountOut:CountOUT,TotalCount:TotalC, PercentOut:round(CountOUT/toFloat(TotalC)*100,1)} as info
+Targets:
+  - Name: Sentinel
+    Enabled: true
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_AD_Chokeopoints
+    DisplayName: AD Chokepoints
+    SearchKey: Target
+    Overwrite: true

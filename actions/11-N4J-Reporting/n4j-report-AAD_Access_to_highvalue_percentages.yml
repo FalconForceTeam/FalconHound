@@ -1,0 +1,28 @@
+Name: Get the amount of users with a path to Tier 0 and High Value Roles
+ID: N4J_REPORT_AAD_Access_to_highvalue_percentages
+Description: Gets the amount of users with a path to Tier 0 and High Value Roles
+Author: FalconForce
+Version: '1.0'
+Info: |-
+  Based on a blog by @sadprocess0r. (https://falconforce.nl/bloodhound-calculating-ad-metrics-0x02/)
+Active: false                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: Neo4j 
+Query: |
+  CALL {MATCH (all:AZUser) RETURN COUNT(all) AS Total}
+  MATCH (x:AZUser)
+  MATCH (y:AZRole)
+  WHERE (coalesce(y.system_tags,"") CONTAINS "admin_tier_0" or y.highvalue=true)
+  MATCH p=shortestPath((x)-[*1..]->(y))
+  WITH y.name AS Target, COUNT(p) AS Count, Total,
+  COLLECT(length(p)) AS lengthList
+  RETURN {Target:Target, Count:Count, Total:Total,
+  Percentage:round(Count/toFloat(Total)*100,2),
+  avgHops:round(reduce(s=0,l in lengthList|s+l)/toFloat(SIZE(lengthList)),2)} as info
+Targets:
+  - Name: CSV
+    Enabled: true
+    Path: report/{{date}}/BH-AccessToAADHighValue_{{date}}.csv
+  - Name: Markdown
+    Enabled: true
+    Path: report/{{date}}/BH-AccessToAADHighValue_{{date}}.md

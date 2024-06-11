@@ -1,0 +1,33 @@
+Name: AAD user added to group
+ID: SEN_AAD_User_Added_To_Group
+Description: Collects AAD / EntraId user accounts added to a group.
+Author: FalconForce
+Version: '1.0'
+Info: |-
+Active: true                                               # Enable to run this action
+Debug: false                                                 # Enable to see query results in the console
+SourcePlatform: Sentinel                                    # Sentinel, Watchlist, Neo4j, CSV, MDE, Graph, Splunk
+Query: |
+  let timeframe = 15m;
+  AuditLogs
+  | where ingestion_time() >= ago(timeframe)
+  | where OperationName =~ "Add member to group"
+  | mv-expand TargetResources
+  | extend TargetResources=parse_json(TargetResources)
+  | extend ObjectId = TargetResources.id, userPrincipalName=TargetResources.userPrincipalName
+  | where TargetResources.modifiedProperties contains "Group.ObjectId"
+  | extend groupObjectId=trim('\"',tostring(TargetResources.modifiedProperties[0].newValue))
+  | project TimeGenerated,ObjectId,userPrincipalName,groupObjectId
+Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
+  - Name: Neo4j
+    Enabled: true
+    Query: |
+      WITH toUpper($ObjectId) AS ObjectId, toUpper($userPrincipalName) AS UserPrincipalName, toUpper($groupObjectId) AS GroupObjectId, $TimeGenerated AS TimeGenerated
+      MERGE (u:AZUser {objectid: ObjectId}) ON CREATE SET u.userPrincipalName = UserPrincipalName, u.displayName = UserPrincipalName
+      MERGE (g:AZGroup {objectid: GroupObjectId}) ON CREATE SET g.displayName = GroupObjectId
+      MERGE (u)-[r:AZMemberOf]->(g) SET r.added = TimeGenerated, r.source = 'falconhound'
+    Parameters:
+      ObjectId: ObjectId
+      userPrincipalName: userPrincipalName
+      GroupObjectId: groupObjectId
+      TimeGenerated: TimeGenerated
