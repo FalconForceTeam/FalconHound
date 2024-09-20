@@ -1,0 +1,22 @@
+Name: Kerberoastable users
+ID: BH_Tier0_Users
+Description: This action lists all users with an SPN
+Author: FalconForce
+Version: '1.0'
+Info: |
+  This is intended to be used as an enrichment list to quantify the impact of an alert on a user that owns a resource.
+Active: false                 # Enable to run this action
+Debug: false                   # Enable to see query results in the console
+SourcePlatform: BloodHound 
+Query: |
+  MATCH (x:Group)
+  WHERE (coalesce(x.system_tags,'') CONTAINS 'admin_tier_0')
+  WITH x.objectid as ObjectID, x.name as Name
+  MATCH (y:Group {objectid:ObjectID})
+  MATCH (u:User)
+  MATCH (u)-[MemberOf]->(y)
+  RETURN u
+Targets:
+  - Name: CSV
+    Enabled: true
+    Path: output/tier0_users.csv

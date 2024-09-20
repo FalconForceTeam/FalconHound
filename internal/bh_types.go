@@ -182,3 +182,48 @@ type OU struct {
 	ChildObjects []TypedPrincipal
 	Links        []GPLink
 }
+
+type Node struct {
+	Label      string         `json:"label"`
+	Kind       string         `json:"kind"`
+	ObjectID   string         `json:"objectId"`
+	IsTierZero bool           `json:"isTierZero"`
+	LastSeen   string         `json:"lastSeen"`
+	Properties NodeProperties `json:"properties"`
+}
+
+type NodeProperties struct {
+	AdminCount              bool     `json:"admincount"`
+	Description             string   `json:"description"`
+	DistinguishedName       string   `json:"distinguishedname"`
+	Domain                  string   `json:"domain"`
+	DomainSID               string   `json:"domainsid"`
+	DontReqPreAuth          bool     `json:"dontreqpreauth"`
+	Enabled                 bool     `json:"enabled"`
+	HasSPN                  bool     `json:"hasspn"`
+	IsACLProtected          bool     `json:"isaclprotected"`
+	LastLogon               int64    `json:"lastlogon"`
+	LastLogonTimestamp      int64    `json:"lastlogontimestamp"`
+	LastSeen                string   `json:"lastseen"`
+	Name                    string   `json:"name"`
+	ObjectID                string   `json:"objectid"`
+	PasswordNotRequired     bool     `json:"passwordnotreqd"`
+	PwdLastSet              int64    `json:"pwdlastset"`
+	PwdNeverExpires         bool     `json:"pwdneverexpires"`
+	SAMAccountName          string   `json:"samaccountname"`
+	Sensitive               bool     `json:"sensitive"`
+	ServicePrincipalNames   []string `json:"serviceprincipalnames"`
+	SIDHistory              []string `json:"sidhistory"`
+	TrustedToAuth           bool     `json:"trustedtoauth"`
+	UnconstrainedDelegation bool     `json:"unconstraineddelegation"`
+	WhenCreated             int64    `json:"whencreated"`
+}
+
+type Data struct {
+	Nodes map[string]Node `json:"nodes"`
+	Edges []interface{}   `json:"edges"` // Assuming edges are not used in this example
+}
+
+type BHQueryResults struct {
+	Data Data `json:"data"`
+}

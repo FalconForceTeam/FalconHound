@@ -5,6 +5,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"falconhound/internal"
 	"fmt"
 	"io"
@@ -40,7 +41,7 @@ func BHRequest(query string, creds internal.Credentials) (internal.QueryResults,
 
 	method := "POST"
 	uri := "/api/v2/graphs/cypher"
-	queryBody := fmt.Sprintf("{\"query\":\"%s\"}", query)
+	queryBody := fmt.Sprintf("{\"query\":\"%s\",  \"include_properties\": true}", query)
 	log.Println("Query body:", queryBody)
 	body := []byte(queryBody)
 
@@ -91,7 +92,25 @@ func BHRequest(query string, creds internal.Credentials) (internal.QueryResults,
 		fmt.Println("Error reading response body:", err)
 	}
 
-	fmt.Println("Response:", string(respbody))
-	// TODO parse response body into QueryResults
-	return nil, nil
+	//fmt.Println("Response:", string(respbody))
+
+	var bhresults internal.BHQueryResults
+	err = json.Unmarshal(respbody, &bhresults)
+	if err != nil {
+		return internal.QueryResults{}, fmt.Errorf("error unmarshalling response body: %w", err)
+	}
+
+	// append each node in bhresults to the results
+	results := make(internal.QueryResults, 0)
+	for _, node := range bhresults.Data.Nodes {
+		result := make(map[string]interface{})
+		result["label"] = node.Label
+		result["kind"] = node.Kind
+		result["objectId"] = node.ObjectID
+		result["isTierZero"] = node.IsTierZero
+		result["lastSeen"] = node.LastSeen
+		result["properties"] = node.Properties
+		results = append(results, result)
+	}
+	return results, nil
 }
