@@ -283,6 +283,11 @@ Like Sentinel, Splunk will write the results of the query to a ADX table. The da
     Table: "name"
 ```
 
+To create a table in ADX you can use the following command:
+```kql
+.create table FalconHound (Name: string, Description: string, EventID: string, BHQuery: string, EventData: dynamic, Timestamp: datetime) 
+```
+
 ### Extensions to the graph
 
 #### Relationship: HadSession
