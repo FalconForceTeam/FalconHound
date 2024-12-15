@@ -18,6 +18,7 @@ keyvault:
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
   authType: msi 
+  
 ################################################
 # Add your Sentinel connection information here
 ################################################
