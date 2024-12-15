@@ -5,14 +5,21 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 	"github.com/spf13/viper"
 )
 
-func GetSecretFromAzureKeyVault(keyVaultName string, secretName string) (string, error) {
+func GetSecretFromAzureKeyVault(keyVaultName string, secretName string, authtype string) (string, error) {
 	// Create a new DefaultAzureCredential
-	cred, err := azidentity.NewClientSecretCredential(viper.GetString("keyvault.tenantID"), viper.GetString("keyvault.appID"), viper.GetString("keyvault.appSecret"), nil)
+	var cred azcore.TokenCredential
+	var err error
+	if authtype == "msi" {
+		cred, err = azidentity.NewManagedIdentityCredential(nil)
+	} else {
+		cred, err = azidentity.NewClientSecretCredential(viper.GetString("keyvault.tenantID"), viper.GetString("keyvault.appID"), viper.GetString("keyvault.appSecret"), nil)
+	}
 	// cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
 		log.Fatalf("Failed to create the credentials: %v", err)

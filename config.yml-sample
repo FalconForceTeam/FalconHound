@@ -9,13 +9,15 @@
 # This is optional, when used, FalconHound will pull the
 # API keys from Keyvault instead of this file
 # start with the -keyvault flag
+# if authType is defined with MSI, then appID and appSecret can be omitted.
+# if you wish to use client secret credentials, then defined appid, tenantID and appSecret
 ################################################
 keyvault:
   uri: https://XXXXXXXX.vault.azure.net/
   tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
-
+  authType: msi 
 ################################################
 # Add your Sentinel connection information here
 ################################################
