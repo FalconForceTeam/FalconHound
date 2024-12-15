@@ -123,7 +123,7 @@ By default, FalconHound will look for the actions folder in the current director
 ```
 
 #### Run with credentials from a keyvault
-By default, FalconHound will use the credentials in the config.yml (or a custom loaded one). By setting the `-keyvault` flag FalconHound will get the keyvault from the config and retrieve all secrets from there. Should there be items missing in the keyvault it will fall back to the config file.
+By default, FalconHound will use the credentials in the config.yml (or a custom loaded one). By setting the `-keyvault` flag FalconHound will get the keyvault from the config and retrieve all secrets from there. Should there be items missing in the keyvault it will fall back to the config file. Should you wish to grab the secrets from an azure keyvault using a managed identity, define the authtype variable as msi. 
 
 ```bash
 ./falconhound -go -keyvault
