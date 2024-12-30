@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"falconhound/internal"
 	"fmt"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"io"
 	"log"
 	"net/http"
@@ -39,8 +40,8 @@ type MDESession struct {
 var _MDESession MDESession
 
 func (m *MDEProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	if m.Credentials.MDEAppSecret == "" {
-		return internal.QueryResults{}, fmt.Errorf("MDEAppSecret is empty, skipping..")
+	if m.Credentials.MDEAppSecret == "" && (m.Credentials.MDEManagedIdentity == "" || m.Credentials.MDEManagedIdentity == "false") {
+		return internal.QueryResults{}, fmt.Errorf("MDEAppSecret is empty and no Managed Identity Enabled, skipping..")
 	}
 
 	if !_MDESession.initialized {
@@ -94,9 +95,20 @@ func (m *MDEProcessor) ExecuteQuery() (internal.QueryResults, error) {
 }
 
 func MDEToken(creds internal.Credentials) string {
-	cred, err := azidentity.NewClientSecretCredential(creds.MDETenantID, creds.MDEAppID, creds.MDEAppSecret, nil)
-	if err != nil {
-		fmt.Println("err")
+	var cred azcore.TokenCredential
+	var err error
+
+	if creds.MDEManagedIdentity == "true" {
+		log.Printf("Using Managed Identity for MDE")
+		cred, err = azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			fmt.Println("Error creating ManagedIdentityCredential:", err)
+		}
+	} else {
+		cred, err = azidentity.NewClientSecretCredential(creds.MDETenantID, creds.MDEAppID, creds.MDEAppSecret, nil)
+		if err != nil {
+			fmt.Println("Error creating ClientSecretCredential:", err)
+		}
 	}
 
 	var ctx = context.Background()

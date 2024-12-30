@@ -5,8 +5,10 @@ import (
 	"falconhound/input_processor/input_cmd"
 	"falconhound/internal"
 	"fmt"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	msgraphsdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
+	"log"
 	"strings"
 )
 
@@ -33,7 +35,7 @@ type MsGraphApiResults struct {
 }
 
 func (m *MsGraphApiProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	if m.Credentials.GraphAppSecret == "" {
+	if m.Credentials.GraphAppSecret == "" && (m.Credentials.GraphManagedIdentity == "false" || m.Credentials.GraphManagedIdentity == "") {
 		return internal.QueryResults{}, fmt.Errorf("GraphAppSecret is empty, skipping..")
 	}
 
@@ -92,10 +94,22 @@ func (m *MsGraphApiProcessor) ExecuteQuery() (internal.QueryResults, error) {
 }
 
 func graphClient(creds internal.Credentials) msgraphsdk.GraphServiceClient {
-	cred, err := azidentity.NewClientSecretCredential(creds.GraphTenantID, creds.GraphAppID, creds.GraphAppSecret, nil)
-	if err != nil {
-		fmt.Println("err")
-		panic(err)
+	var cred azcore.TokenCredential
+	var err error
+
+	if creds.GraphManagedIdentity == "true" {
+		log.Printf("Using Managed Identity for Graph API")
+		cred, err = azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			fmt.Println("Error creating ManagedIdentityCredential:", err)
+			panic(err)
+		}
+	} else {
+		cred, err = azidentity.NewClientSecretCredential(creds.GraphTenantID, creds.GraphAppID, creds.GraphAppSecret, nil)
+		if err != nil {
+			fmt.Println("Error creating ClientSecretCredential:", err)
+			panic(err)
+		}
 	}
 
 	graphClient, err := msgraphsdk.NewGraphServiceClientWithCredentials(cred, []string{"https://graph.microsoft.com/.default"})

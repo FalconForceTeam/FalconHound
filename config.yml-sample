@@ -9,28 +9,30 @@
 # This is optional, when used, FalconHound will pull the
 # API keys from Keyvault instead of this file
 # start with the -keyvault flag
-# if authType is defined with MSI, then appID and appSecret can be omitted.
-# if you wish to use client secret credentials, then defined appid, tenantID and appSecret
+# if managedIdentity is true, then tenantID, appID and appSecret can be omitted.
+# if you wish to use client secret credentials, then define appid, tenantID and appSecret
 ################################################
 keyvault:
   uri: https://XXXXXXXX.vault.azure.net/
   tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
-  authType: msi 
+  managedIdentity: false
   
 ################################################
 # Add your Sentinel connection information here
 ################################################
 sentinel:
+  managedIdentity: false
+  tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appSecret: xxxxxxxxxxxxxx
+  ## All the below information is required
   workspaceID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   subscriptionID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   resourceGroup: "XXXXXXX"
   sharedKey: xxxxxxxxxxxxxx
   targetTable: "FalconHound"
-  tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-  appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-  appSecret: xxxxxxxxxxxxxx
   workspaceName: "XXXXXXXX"
 
 ################################################
@@ -39,6 +41,17 @@ sentinel:
 # or preferably a different one
 ################################################
 MDE:
+  managedIdentity: false
+  tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appSecret: xxxxxxxxxxxxxx
+
+################################################
+# Add your MS Graph connection information here
+# This can be the same app as Sentinel or a different one
+################################################
+graph:
+  managedIdentity: false
   tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx

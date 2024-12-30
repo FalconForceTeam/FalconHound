@@ -44,6 +44,21 @@ Also, the following Application API permissions are required (set on the app reg
 
 `Log Analytics API => Data.Read`
 
+To add the required API permissions for Sentinel to your Managed Identity, you can use the following script. Please note the roles still need to be set manually
+```powershell
+# Replace with your managed identity object ID
+$managedIdentityId = "<your managed identity app id>"
+$appId = "ca7f3f0b-7d91-482c-8e09-c5d840d0eac5"
+$permissionsToAdd = @("Data.Read")
+Connect-AzureAD
+$app = Get-AzureADServicePrincipal -Filter "AppId eq '$appId'"
+foreach ($permission in $permissionsToAdd)
+{
+$role = $app.AppRoles | where Value -Like $permission | Select-Object -First 1
+New-AzureADServiceAppRoleAssignment -Id $role.Id -ObjectId $managedIdentityId -PrincipalId $managedIdentityId -ResourceId $app.ObjectId
+}
+```
+
 ## Sentinel Log Writing
 To write to Sentinel, you need to have the following details:
 
@@ -72,6 +87,21 @@ To query Sentinel, you need to have the following roles assigned to your app reg
 
 This will require admin consent.
 
+To add the required permissions for the MDE API to your Managed Identity, you can use the following script:
+```powershell
+# Replace with your managed identity object ID
+$managedIdentityId = "<your managed identity app id>"
+$appId = "fc780465-2017-40d4-a0c5-307022471b92"
+$permissionsToAdd = @("AdvancedQuery.Read.All"")
+Connect-AzureAD
+$app = Get-AzureADServicePrincipal -Filter "AppId eq '$appId'"
+foreach ($permission in $permissionsToAdd)
+{
+   $role = $app.AppRoles | where Value -Like $permission | Select-Object -First 1
+   New-AzureADServiceAppRoleAssignment -Id $role.Id -ObjectId $managedIdentityId -PrincipalId $managedIdentityId -ResourceId $app.ObjectId
+}
+```
+
 ## MS Graph API 
 Currently, the MS Graph API action processor only collects PIM information, so this is optional to enable.
 To query the MS Graph API, you need to have the following Application API permissions (set on the App registration):
@@ -84,6 +114,21 @@ To query the MS Graph API, you need to have the following Application API permis
 `Microsoft Graph => RoleEligibilitySchedule.Read.Directory`
 `Microsoft Graph => RoleManagement.Read.All`
 `Microsoft Graph => User.Read`
+
+To add the required permissions for the MS Graph API to your Managed Identity, you can use the following script:
+```powershell
+# Replace with your managed identity object ID
+$managedIdentityId = "<your managed identity app id>"
+$appId = "00000003-0000-0000-c000-000000000000"
+$permissionsToAdd = @("PrivilegedAccess.Read.AzureAD", "PrivilegedAccess.Read.AzureADGroup", "PrivilegedAccess.Read.AzureResources", "PrivilegedEligibilitySchedule.Read.AzureADGroup", "RoleAssignmentSchedule.Read.Directory", "RoleEligibilitySchedule.Read.Directory", "RoleManagement.Read.All","User.Read.All", "UserAuthenticationMethod.Read.All")
+Connect-AzureAD
+$app = Get-AzureADServicePrincipal -Filter "AppId eq '$appId'"
+foreach ($permission in $permissionsToAdd)
+{
+$role = $app.AppRoles | where Value -Like $permission | Select-Object -First 1
+New-AzureADServiceAppRoleAssignment -Id $role.Id -ObjectId $managedIdentityId -PrincipalId $managedIdentityId -ResourceId $app.ObjectId
+}
+```
 
 ## Neo4j
 This is the only action processor that requires a username and password to be set in the config file.

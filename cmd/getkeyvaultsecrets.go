@@ -11,11 +11,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func GetSecretFromAzureKeyVault(keyVaultName string, secretName string, authtype string) (string, error) {
+func GetSecretFromAzureKeyVault(keyVaultName string, secretName string, managedIdentity string) (string, error) {
 	// Create a new DefaultAzureCredential
 	var cred azcore.TokenCredential
 	var err error
-	if authtype == "msi" {
+	if managedIdentity == "true" {
 		cred, err = azidentity.NewManagedIdentityCredential(nil)
 	} else {
 		cred, err = azidentity.NewClientSecretCredential(viper.GetString("keyvault.tenantID"), viper.GetString("keyvault.appID"), viper.GetString("keyvault.appSecret"), nil)

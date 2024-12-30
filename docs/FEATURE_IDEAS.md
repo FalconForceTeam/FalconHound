@@ -34,7 +34,7 @@ BH(E) API - under development
 
 Generic output processors
 - [ ] Write BH compatible JSON outputs
-- [ ] Write markdown outputs
+- [x] Write markdown outputs
 - [x] Write to storage account
 - [-] Write to ADX (beta)
 
@@ -49,9 +49,9 @@ GraphAPI
 
 ## Operational
 
-- [ ] Token needs to be used more efficiently
+- [x] Token needs to be used more efficiently
 - [x] Add global debug mode
-- [ ] Add check that if a credential is empty in the config the in/out processor is not used
+- [x] Add check that if a credential is empty in the config the in/out processor is not used
 
 - [ ] Add more logging
 - [x] Add more error handling
@@ -59,7 +59,7 @@ GraphAPI
 ## Future releases
 
 - [ ] Add env variable to creds options
-- [ ] Add managed identity option
+- [x] Add managed identity option
 - [ ] Excel sheet reports
 - [x] Configurable time window for actions
 - [ ] Write to Teams

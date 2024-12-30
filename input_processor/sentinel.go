@@ -2,9 +2,12 @@ package input_processor
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"falconhound/internal"
 	"fmt"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"io"
 	"log"
 	"net/http"
@@ -33,8 +36,8 @@ type SentinelResults struct {
 }
 
 func (m *SentinelProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	if m.Credentials.SentinelAppSecret == "" {
-		return internal.QueryResults{}, fmt.Errorf("SentinelAppSecret is empty, skipping..")
+	if m.Credentials.SentinelAppSecret == "" && (m.Credentials.SentinelManagedIdentity == "" || m.Credentials.SentinelManagedIdentity == "false") {
+		return internal.QueryResults{}, fmt.Errorf("SentinelAppSecret is empty and no Managed Identity set, skipping..")
 	}
 
 	results, err := LArunQuery(m.Query, m.Credentials)
@@ -116,15 +119,33 @@ func LArunQuery(query string, creds internal.Credentials) ([]byte, error) {
 }
 
 func getToken(creds internal.Credentials) (string, error) {
-	cfg := auth.AuthConfig{
-		ClientID:     creds.SentinelAppID,
-		ClientSecret: creds.SentinelAppSecret,
-		ClientScope:  "https://api.loganalytics.io/.default",
+	var token string
+	var err error
+
+	if creds.SentinelManagedIdentity == "true" {
+		log.Printf("Using Managed Identity for Sentinel")
+		cred, err := azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			return "", fmt.Errorf("error creating ManagedIdentityCredential: %v", err)
+		}
+		ctx := context.Background()
+		policy := policy.TokenRequestOptions{Scopes: []string{"https://api.loganalytics.io/.default"}}
+		tk, err := cred.GetToken(ctx, policy)
+		if err != nil {
+			return "", fmt.Errorf("error getting token: %v", err)
+		}
+		token = tk.Token
+	} else {
+		cfg := auth.AuthConfig{
+			ClientID:     creds.SentinelAppID,
+			ClientSecret: creds.SentinelAppSecret,
+			ClientScope:  "https://api.loganalytics.io/.default",
+		}
+		token, err = auth.RequestAccessToken(creds.SentinelTenantID, cfg)
+		if err != nil {
+			return "", fmt.Errorf("error requesting access token: %v", err)
+		}
 	}
 
-	token, err := auth.RequestAccessToken(creds.SentinelTenantID, cfg)
-	if err != nil {
-		return "", err
-	}
 	return token, nil
 }

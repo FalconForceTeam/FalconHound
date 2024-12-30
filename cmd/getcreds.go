@@ -51,7 +51,7 @@ func GetCreds(configFile string, keyvaultFlag bool) (theCreds internal.Credentia
 		tag := field.Tag.Get("config")
 		var value string
 		if keyvaultFlag {
-			value, err = GetSecretFromAzureKeyVault(viper.GetString("keyvault.uri"), field.Name, viper.GetString("keyvault.authType"))
+			value, err = GetSecretFromAzureKeyVault(viper.GetString("keyvault.uri"), field.Name, viper.GetString("keyvault.managedIdentity"))
 			if err != nil {
 				LogInfo("[!] %s not in keyvault, grabbing it from the config...", field.Name)
 				value = viper.GetString(tag)
