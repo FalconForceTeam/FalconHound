@@ -320,7 +320,7 @@ Computer:
 The currently supported ways of providing FalconHound with credentials are:
 
 - Via the config.yml file on disk.
-- Keyvault secrets. This still requires a ServicePrincipal with secrets in the yaml.
+- Keyvault secrets. This requires a Managed Sytem Identity assigned to the VM or a ServicePrincipal with secrets in the yaml.
 - Mixed mode.
 
 #### Config.yml
@@ -333,9 +333,11 @@ The required permissions for your AppID/AppSecret are listed [here](docs/require
 #### Keyvault
 
 A more secure way of storing the credentials would be to use an Azure KeyVault. Be aware that there is a small [cost aspect](https://azure.microsoft.com/en-us/pricing/details/key-vault/) to using Keyvaults. 
-Access to KeyVaults currently only supports authentication based on a AppID/AppSecret which needs to be configured in the config.yml file.
+Access to KeyVaults currently supports authentication based on a Managed System Identity or AppID/AppSecret which needs to be configured in the config.yml file.
 
-The recommended way to set this up is to use a ServicePrincipal that only has the `Key Vault Secrets User` role to this Keyvault. This role only allows access to the secrets, not even list them. Do *NOT* reuse the ServicePrincipal which has access to Sentinel and/or MDE, since this almost completely negates the use of a Keyvault.  
+The recommended way to set this up is to assign a Managed System Identity to the VM that FalconHound is running on and assign it the `Key Vault Secrets User` role to this Keyvault. This will allow FalconHound to authenticate to the Keyvault without the need for any additional configuration. 
+
+Alternatively you can use a ServicePrincipal that only has the `Key Vault Secrets User` role to this Keyvault. This role only allows access to the secrets, not even list them. Do *NOT* reuse the ServicePrincipal which has access to Sentinel and/or MDE, since this almost completely negates the use of a Keyvault.  
 
 The items to configure in the Keyvault are listed below. Please note Keyvault secrets are **not** case-sensitive.
 
@@ -375,13 +377,19 @@ BHTokenKey
 LogScaleUrl
 LogScaleToken
 LogScaleRepository
+LimaCharlieAPIUrl
+LimaCharlieOrgId
+LimaCharlieIngestKey
+ElasticCloudID
+ElasticApiKey
 ```
 
 Once configured you can add the `-keyvault` parameter while starting FalconHound.
 
 #### Mixed mode / fallback
 
-When the `-keyvault` parameter is set on the command-line, this will be the primary source for all required secrets. Should FalconHound fail to retrieve items, it will fall back to the equivalent item in the `config.yml`. If both fail and there are actions enabled for that source or target, it will throw errors on attempts to authenticate.
+When the `-keyvault` parameter is set on the command-line, this will be the primary source for all required secrets. Should FalconHound fail to retrieve items, it will fall back to the equivalent item in the `config.yml`. 
+If both fail and there are actions enabled for that source or target, it will throw a warning and skip the action(s).
 
 ## Deployment
 

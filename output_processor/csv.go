@@ -30,7 +30,6 @@ func (m *CSVOutputProcessor) ProduceOutput(QueryResults internal.QueryResults) e
 	return err
 }
 
-// WriteCSV writes the results to a CSV file
 func WriteCSV(results internal.QueryResults, path string) error {
 	//replace {{date}} with the current date if it exists
 	path = strings.Replace(path, "{{date}}", time.Now().Format("2006-01-02"), 2)
@@ -46,7 +45,7 @@ func WriteCSV(results internal.QueryResults, path string) error {
 	}
 	// Initialize the writer
 	csvWriter := csv.NewWriter(csvFile)
-	// Get the keys from the first record
+
 	var keys []string
 	if len(results) > 0 {
 		for k := range results[0] {

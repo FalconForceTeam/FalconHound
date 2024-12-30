@@ -6,6 +6,7 @@ Version: '1.0'
 Info: |-
 Active: true                 # Enable to run this action
 Debug: false                   # Enable to see query results in the console
+Type: Report
 SourcePlatform: Neo4j 
 Query: |
   MATCH (n:Group) 
@@ -23,3 +24,6 @@ Targets:
   - Name: Markdown
     Enabled: true
     Path: report/{{date}}/BH-DA.1_pathToDA_{{date}}.md
+  - Name: HTML
+    Enabled: true
+    Path: report/{{date}}/BH-DA.1_pathToDA_{{date}}.html

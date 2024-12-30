@@ -6,7 +6,8 @@ Version: '1.0'
 Info: |-
 Active: true                 # Enable to run this action
 Debug: false                   # Enable to see query results in the console
-SourcePlatform: Neo4j 
+Type: Report
+SourcePlatform: Neo4j
 Query: |
   MATCH (u:AZUser)
   WHERE u.MfaAuthenticatorDeviceId IS NOT NULL AND u.MfaAuthenticatorDeviceId <> ''
@@ -21,3 +22,6 @@ Targets:
   - Name: Markdown
     Enabled: true
     Path: report/{{date}}/BH-MFA_DEVICE_SHARING_{{date}}.md
+  - Name: HTML
+    Enabled: true
+    Path: report/{{date}}/BH-MFA_DEVICE_SHARING_{{date}}.html

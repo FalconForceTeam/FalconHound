@@ -43,6 +43,7 @@ type Query struct {
 	Targets        []Target `yaml:"Targets"`
 	Description    string   `yaml:"Description"`
 	ID             string   `yaml:"ID"`
+	Type           string   `yaml:"Type"`
 }
 
 func main() {
@@ -79,6 +80,9 @@ func main() {
 	var adxinitFlag bool
 	flag.BoolVar(&adxinitFlag, "adxinit", false, "Initialize the Azure Data Explorer table (requires database admin permissions) and -go")
 
+	var reportFlag bool
+	flag.BoolVar(&reportFlag, "report", false, "Only run the actions configured with Type:Report, these are skipped by default. (Use in combination with -go)")
+
 	flag.Parse()
 
 	if helpFlag {
@@ -94,7 +98,7 @@ func main() {
 			// split ids on comma
 			actionIdFilters = append(actionIdFilters, strings.Split(ids, ",")...)
 		}
-		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug, lookback, skipinput, adxinitFlag)
+		run(actionsDir, configFile, keyvaultFlag, actionIdFilters, actionlistFlag, debug, lookback, skipinput, adxinitFlag, reportFlag)
 	} else {
 		printHelp()
 		os.Exit(0)
@@ -272,6 +276,17 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				BatchSize: target.BatchSize,
 			},
 		}, nil
+	case "HTML":
+		return &output_processor.HTMLOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.HTMLOutputConfig{
+				Path:             target.Path,
+				QueryName:        query.Name,
+				QueryDescription: query.Description,
+				QueryEventID:     query.ID,
+				QueryDate:        time.Now().Format("2006-01-02"),
+			},
+		}, nil
 	default:
 		return nil, fmt.Errorf("Target %q not supported", target.Name)
 	}
@@ -344,7 +359,7 @@ func makeInputProcessor(query Query, credentials internal.Credentials, outputs [
 	}
 }
 
-func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool, debug bool, lookback string, skipinput string, adxinitflag bool) {
+func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilters []string, actionlistFlag bool, debug bool, lookback string, skipinput string, adxinitflag bool, reportFlag bool) {
 	// create error log
 	fileError, err := openLogFile("./error.log")
 	if err != nil {
@@ -409,6 +424,16 @@ func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilter
 					logInfo("[i] Skipping input processor for %s", q.SourcePlatform)
 					//set enabled to false so the query is not run
 					q.Active = false
+				}
+			}
+
+			if reportFlag {
+				if q.Type != "Report" {
+					continue
+				}
+			} else {
+				if q.Type == "Report" {
+					continue
 				}
 			}
 

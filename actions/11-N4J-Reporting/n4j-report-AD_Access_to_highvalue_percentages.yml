@@ -9,7 +9,8 @@ Info: |-
   Based on a blog by @sadprocess0r. (https://falconforce.nl/bloodhound-calculating-ad-metrics-0x02/)
 Active: false                 # Enable to run this action
 Debug: false                   # Enable to see query results in the console
-SourcePlatform: Neo4j 
+Type: Report
+SourcePlatform: Neo4j
 Query: |
   CALL {MATCH (all:User) RETURN COUNT(all) AS Total}
   MATCH (x:User)
@@ -28,3 +29,6 @@ Targets:
   - Name: Markdown
     Enabled: true
     Path: report/{{date}}/BH-AccessToADHighValue_{{date}}.md
+  - Name: HTML
+    Enabled: true
+    Path: report/{{date}}/BH-AccessToADHighValue_{{date}}.html

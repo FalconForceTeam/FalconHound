@@ -25,6 +25,13 @@
         "Query": {
             "type": "string"
         },
+        "Type": {
+            "type": "string",
+            "enum": [
+                "Report",
+                "Action"
+            ]
+        },
         "SourcePlatform": {
             "type": "string",
             "enum": [
@@ -63,7 +70,8 @@
                             "ADX",
                             "LimaCharlie",
                             "Markdown",
-                            "JSON"
+                            "JSON",
+                            "HTML"
                         ]
                     },
                     "Enabled": {
@@ -284,6 +292,32 @@
                                 "DisplayName",
                                 "SearchKey",
                                 "Overwrite"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "HTML"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                },
+                                "Path": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "Path"
                             ],
                             "additionalProperties": false
                         }
