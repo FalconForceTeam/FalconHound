@@ -29,5 +29,5 @@ Targets:                                                   # Targets are the pla
     Parameters:
       ObjectId: ObjectId
       userPrincipalName: userPrincipalName
-      GroupObjectId: groupObjectId
+      groupObjectId: groupObjectId
       TimeGenerated: TimeGenerated
