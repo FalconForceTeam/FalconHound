@@ -114,13 +114,14 @@ To query the MS Graph API, you need to have the following Application API permis
 `Microsoft Graph => RoleEligibilitySchedule.Read.Directory`
 `Microsoft Graph => RoleManagement.Read.All`
 `Microsoft Graph => User.Read`
+`Microsoft Graph => Directory.Read.All`
 
 To add the required permissions for the MS Graph API to your Managed Identity, you can use the following script:
 ```powershell
 # Replace with your managed identity object ID
 $managedIdentityId = "<your managed identity app id>"
 $appId = "00000003-0000-0000-c000-000000000000"
-$permissionsToAdd = @("PrivilegedAccess.Read.AzureAD", "PrivilegedAccess.Read.AzureADGroup", "PrivilegedAccess.Read.AzureResources", "PrivilegedEligibilitySchedule.Read.AzureADGroup", "RoleAssignmentSchedule.Read.Directory", "RoleEligibilitySchedule.Read.Directory", "RoleManagement.Read.All","User.Read.All", "UserAuthenticationMethod.Read.All")
+$permissionsToAdd = @("PrivilegedAccess.Read.AzureAD", "PrivilegedAccess.Read.AzureADGroup", "PrivilegedAccess.Read.AzureResources", "PrivilegedEligibilitySchedule.Read.AzureADGroup", "RoleAssignmentSchedule.Read.Directory", "RoleEligibilitySchedule.Read.Directory", "RoleManagement.Read.All","User.Read.All", "UserAuthenticationMethod.Read.All", "Directory.Read.All")
 Connect-AzureAD
 $app = Get-AzureADServicePrincipal -Filter "AppId eq '$appId'"
 foreach ($permission in $permissionsToAdd)
