@@ -1,10 +1,22 @@
-![Maintenance](https://img.shields.io/maintenance/yes/2024.svg?style=flat-square)
+![Maintenance](https://img.shields.io/maintenance/yes/2025.svg?style=flat-square)
 [![Twitter](https://img.shields.io/twitter/follow/falconforceteam.svg?style=social&label=Follow)](https://twitter.com/falconforceteam)
 [![Discord Shield](https://discordapp.com/api/guilds/715302469751668787/widget.png?style=shield)](https://discord.gg/CBTvTkb4)
 
 # FalconHound
 
 ![logo](docs/falconhound-logo.png)
+
+---
+## NOTE:
+As of the BloodHound CE 7.0 release, the default database has been switched to Postgres. This version of FalconHound still relies on Neo4j to be the default database. 
+If you want to keep using FalconHound while running the latest BloodHound version, add the following line to your bloodhound.config.json file.
+
+```json
+ "graph_driver": "neo4j",
+```
+
+The BloodHound team will keep support for Neo4j for at least a year. Within this timeframe there hopefully is either a big API improvement or we have implemented PGSQL support to FalconHound.
+---
 
 FalconHound is a blue team multi-tool. It allows you to utilize and enhance the power of BloodHound in a more automated fashion. It is designed to be used in conjunction with a SIEM or other log aggregation tool. 
 
