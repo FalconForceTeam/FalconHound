@@ -16,6 +16,7 @@ If you want to keep using FalconHound while running the latest BloodHound versio
 ```
 
 The BloodHound team will keep support for Neo4j for at least a year. Within this timeframe there hopefully is either a big API improvement or we have implemented PGSQL support to FalconHound.
+
 ---
 
 FalconHound is a blue team multi-tool. It allows you to utilize and enhance the power of BloodHound in a more automated fashion. It is designed to be used in conjunction with a SIEM or other log aggregation tool. 
