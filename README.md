@@ -1,4 +1,4 @@
-![Maintenance](https://img.shields.io/maintenance/yes/2025.svg?style=flat-square)
+![Maintenance](https://img.shields.io/maintenance/yes/2026.svg?style=flat-square)
 [![Twitter](https://img.shields.io/twitter/follow/falconforceteam.svg?style=social&label=Follow)](https://twitter.com/falconforceteam)
 [![Discord Shield](https://discordapp.com/api/guilds/715302469751668787/widget.png?style=shield)](https://discord.gg/CBTvTkb4)
 
