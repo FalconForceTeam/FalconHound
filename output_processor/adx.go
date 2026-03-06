@@ -5,10 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"falconhound/internal"
-	"github.com/Azure/azure-kusto-go/kusto"
-	"github.com/Azure/azure-kusto-go/kusto/ingest"
+	"fmt"
 	"log"
 	"time"
+
+	"github.com/Azure/azure-kusto-go/kusto"
+	"github.com/Azure/azure-kusto-go/kusto/ingest"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 )
 
 type ADXOutputConfig struct {
@@ -19,6 +24,14 @@ type ADXOutputConfig struct {
 	Table            string
 	BatchSize        int
 }
+
+type ADXSession struct {
+	initialized bool
+	token       string
+}
+
+// Used to persist ADX token across requests
+var _ADXSession ADXSession
 
 type ADXOutputProcessor struct {
 	*OutputProcessor
@@ -33,6 +46,15 @@ func (m *ADXOutputProcessor) BatchSize() int {
 }
 
 func (m *ADXOutputProcessor) ProduceOutput(QueryResults internal.QueryResults) error {
+	if m.Credentials.AdxAppSecret == "" && (m.Credentials.AdxManagedIdentity == "" || m.Credentials.AdxManagedIdentity == "false") && (m.Credentials.AdxFederatedWorkloadIdentity == "" || m.Credentials.AdxFederatedWorkloadIdentity == "false") {
+		return fmt.Errorf("ADXAppSecret is empty and no Managed Identity or Federated Workload Identity set, skipping..")
+	}
+
+	if !_ADXSession.initialized {
+		_ADXSession.token = ADXToken(m.Credentials)
+		_ADXSession.initialized = true
+	}
+
 	jsonData, err := json.Marshal(QueryResults)
 	if err != nil {
 		log.Fatalf("failed to marshal data: %s", err)
@@ -51,7 +73,7 @@ func (m *ADXOutputProcessor) ProduceOutput(QueryResults internal.QueryResults) e
 	}
 
 	kustoConnectionStringBuilder := kusto.NewConnectionStringBuilder(m.Credentials.AdxClusterURL)
-	kustoConnectionString := kustoConnectionStringBuilder.WithAadAppKey(m.Credentials.AdxAppID, m.Credentials.AdxAppSecret, m.Credentials.AdxTenantID)
+	kustoConnectionString := kustoConnectionStringBuilder.WithApplicationToken(m.Credentials.AdxAppID, _ADXSession.token)
 
 	client, err := kusto.New(kustoConnectionString)
 	if err != nil {
@@ -82,4 +104,51 @@ func (m *ADXOutputProcessor) ProduceOutput(QueryResults internal.QueryResults) e
 	}
 
 	return client.Close()
+}
+
+func ADXToken(creds internal.Credentials) string {
+	var cred azcore.TokenCredential
+	var assertionCredentials azcore.TokenCredential
+	var err error
+
+	if creds.AdxManagedIdentity == "true" {
+		log.Printf("Using Managed Identity for ADX")
+		cred, err = azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			fmt.Println("Error creating ManagedIdentityCredential:", err)
+		}
+	} else if creds.AdxFederatedWorkloadIdentity == "true" {
+		log.Printf("Using Managed Identity to retrieve Federated Workload Identity Assertion Token for ADX")
+		assertionCredentials, err = azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			fmt.Println("Error creating ManagedIdentityCredential:", err)
+			panic(err)
+		}
+		getAssertion := func(ctx context.Context) (string, error) {
+			tk, err := assertionCredentials.GetToken(ctx, policy.TokenRequestOptions{Scopes: []string{"api://AzureADTokenExchange/.default"}})
+			if err != nil {
+				return "", err
+			}
+			return tk.Token, nil
+		}
+		cred, err = azidentity.NewClientAssertionCredential(creds.AdxTenantID, creds.AdxAppID, getAssertion, nil)
+		if err != nil {
+			fmt.Println("Error creating ClientAssertionCredential:", err)
+			panic(err)
+		}
+	} else {
+		log.Printf("Using Client Secret for ADX")
+		cred, err = azidentity.NewClientSecretCredential(creds.AdxTenantID, creds.AdxAppID, creds.AdxAppSecret, nil)
+		if err != nil {
+			fmt.Println("Error creating ClientSecretCredential:", err)
+		}
+	}
+
+	var ctx = context.Background()
+	policy := policy.TokenRequestOptions{Scopes: []string{creds.AdxClusterURL + "/.default"}}
+	token, err := cred.GetToken(ctx, policy)
+	if err != nil {
+		fmt.Println("Error getting token:", err)
+	}
+	return token.Token
 }

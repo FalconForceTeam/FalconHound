@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"falconhound/internal"
 	"fmt"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"io"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 
 	auth "github.com/gamepat/azure-oauth2-token"
 )
@@ -36,8 +37,8 @@ type SentinelResults struct {
 }
 
 func (m *SentinelProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	if m.Credentials.SentinelAppSecret == "" && (m.Credentials.SentinelManagedIdentity == "" || m.Credentials.SentinelManagedIdentity == "false") {
-		return internal.QueryResults{}, fmt.Errorf("SentinelAppSecret is empty and no Managed Identity set, skipping..")
+	if m.Credentials.SentinelAppSecret == "" && (m.Credentials.SentinelManagedIdentity == "" || m.Credentials.SentinelManagedIdentity == "false") && (m.Credentials.SentinelFederatedWorkloadIdentity == "false" || m.Credentials.SentinelFederatedWorkloadIdentity == "") {
+		return internal.QueryResults{}, fmt.Errorf("SentinelAppSecret is empty and no Managed Identity or Federated Workload Identity set, skipping..")
 	}
 
 	results, err := LArunQuery(m.Query, m.Credentials)
@@ -135,6 +136,34 @@ func getToken(creds internal.Credentials) (string, error) {
 			return "", fmt.Errorf("error getting token: %v", err)
 		}
 		token = tk.Token
+	} else if creds.SentinelFederatedWorkloadIdentity == "true" {
+		log.Printf("Using Managed Identity to retrieve Federated Workload Identity Assertion Token")
+		assertionCredentials, err := azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			fmt.Println("Error creating ManagedIdentityCredential:", err)
+			panic(err)
+		}
+		getAssertion := func(ctx context.Context) (string, error) {
+			tk, err := assertionCredentials.GetToken(ctx, policy.TokenRequestOptions{Scopes: []string{"api://AzureADTokenExchange/.default"}})
+			if err != nil {
+				panic(err)
+			}
+			return tk.Token, nil
+		}
+
+		cred, err := azidentity.NewClientAssertionCredential(creds.SentinelTenantID, creds.SentinelAppID, getAssertion, nil)
+		if err != nil {
+			fmt.Println("Error creating ClientAssertionCredential:", err)
+			panic(err)
+		}
+		ctx := context.Background()
+		policy := policy.TokenRequestOptions{Scopes: []string{"https://api.loganalytics.io/.default"}}
+		tk, err := cred.GetToken(ctx, policy)
+		if err != nil {
+			return "", fmt.Errorf("error getting token: %v", err)
+		}
+		token = tk.Token
+
 	} else {
 		cfg := auth.AuthConfig{
 			ClientID:     creds.SentinelAppID,

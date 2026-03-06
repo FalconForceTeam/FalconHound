@@ -6,10 +6,11 @@ import (
 	"encoding/json"
 	"falconhound/internal"
 	"fmt"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -40,8 +41,8 @@ type MDESession struct {
 var _MDESession MDESession
 
 func (m *MDEProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	if m.Credentials.MDEAppSecret == "" && (m.Credentials.MDEManagedIdentity == "" || m.Credentials.MDEManagedIdentity == "false") {
-		return internal.QueryResults{}, fmt.Errorf("MDEAppSecret is empty and no Managed Identity Enabled, skipping..")
+	if m.Credentials.MDEAppSecret == "" && (m.Credentials.MDEManagedIdentity == "" || m.Credentials.MDEManagedIdentity == "false") && (m.Credentials.MDEFederatedWorkloadIdentity == "false" || m.Credentials.MDEFederatedWorkloadIdentity == "") {
+		return internal.QueryResults{}, fmt.Errorf("MDEAppSecret is empty and no Managed Identity or Federated Workload Identity set, skipping..")
 	}
 
 	if !_MDESession.initialized {
@@ -96,6 +97,7 @@ func (m *MDEProcessor) ExecuteQuery() (internal.QueryResults, error) {
 
 func MDEToken(creds internal.Credentials) string {
 	var cred azcore.TokenCredential
+	var assertionCredentials azcore.TokenCredential
 	var err error
 
 	if creds.MDEManagedIdentity == "true" {
@@ -103,6 +105,25 @@ func MDEToken(creds internal.Credentials) string {
 		cred, err = azidentity.NewManagedIdentityCredential(nil)
 		if err != nil {
 			fmt.Println("Error creating ManagedIdentityCredential:", err)
+		}
+	} else if creds.MDEFederatedWorkloadIdentity == "true" {
+		log.Printf("Using Managed Identity to retrieve Federated Workload Identity Assertion Token")
+		assertionCredentials, err = azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			fmt.Println("Error creating ManagedIdentityCredential:", err)
+			panic(err)
+		}
+		getAssertion := func(ctx context.Context) (string, error) {
+			tk, err := assertionCredentials.GetToken(ctx, policy.TokenRequestOptions{Scopes: []string{"api://AzureADTokenExchange/.default"}})
+			if err != nil {
+				return "", err
+			}
+			return tk.Token, nil
+		}
+		cred, err = azidentity.NewClientAssertionCredential(creds.MDETenantID, creds.MDEAppID, getAssertion, nil)
+		if err != nil {
+			fmt.Println("Error creating ClientAssertionCredential:", err)
+			panic(err)
 		}
 	} else {
 		cred, err = azidentity.NewClientSecretCredential(creds.MDETenantID, creds.MDEAppID, creds.MDEAppSecret, nil)

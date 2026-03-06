@@ -10,7 +10,9 @@
 # API keys from Keyvault instead of this file
 # start with the -keyvault flag
 # if managedIdentity is true, then tenantID, appID and appSecret can be omitted.
+# if federatedWorkloadIdentity is true, then tenantID and appId must be specified. 
 # if you wish to use client secret credentials, then define appid, tenantID and appSecret
+
 ################################################
 keyvault:
   uri: https://XXXXXXXX.vault.azure.net/
@@ -18,6 +20,7 @@ keyvault:
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
   managedIdentity: false
+  federatedWorkloadIdentity: false
   
 ################################################
 # Add your Sentinel connection information here
@@ -27,6 +30,7 @@ sentinel:
   tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
+  federatedWorkloadIdentity: false
   ## All the below information is required
   workspaceID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   subscriptionID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -42,6 +46,7 @@ sentinel:
 ################################################
 MDE:
   managedIdentity: false
+  federatedWorkloadIdentity: false
   tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
@@ -52,6 +57,7 @@ MDE:
 ################################################
 graph:
   managedIdentity: false
+  federatedWorkloadIdentity: false
   tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
@@ -109,3 +115,5 @@ adx:
   tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
+  managedIdentity: false
+  federatedWorkloadIdentity: false

@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"falconhound/internal"
 	"fmt"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"io"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -38,8 +39,8 @@ type MSGraphResults struct {
 var _MSGraphSession MSGraphSession
 
 func (m *MSGraphProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	if m.Credentials.GraphAppSecret == "" && (m.Credentials.GraphManagedIdentity == "false" || m.Credentials.GraphManagedIdentity == "") {
-		return internal.QueryResults{}, fmt.Errorf("GraphAppSecret is empty, skipping..")
+	if m.Credentials.GraphAppSecret == "" && (m.Credentials.GraphManagedIdentity == "false" || m.Credentials.GraphManagedIdentity == "") && (m.Credentials.GraphFederatedWorkloadIdentity == "false" || m.Credentials.GraphFederatedWorkloadIdentity == "") {
+		return internal.QueryResults{}, fmt.Errorf("GraphAppSecret is empty and no Managed Identity or Federated Workload Identity set, skipping..")
 	}
 
 	if !_MSGraphSession.initialized {
@@ -94,6 +95,7 @@ func (m *MSGraphProcessor) ExecuteQuery() (internal.QueryResults, error) {
 
 func graphToken(creds internal.Credentials) string {
 	var cred azcore.TokenCredential
+	var assertionCredentials azcore.TokenCredential
 	var err error
 
 	if creds.GraphManagedIdentity == "true" {
@@ -101,6 +103,26 @@ func graphToken(creds internal.Credentials) string {
 		cred, err = azidentity.NewManagedIdentityCredential(nil)
 		if err != nil {
 			fmt.Println("Error creating ManagedIdentityCredential:", err)
+			panic(err)
+		}
+
+	} else if creds.GraphFederatedWorkloadIdentity == "true" {
+		log.Printf("Using Managed Identity to retrieve Federated Workload Identity Assertion Token")
+		assertionCredentials, err = azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			fmt.Println("Error creating ManagedIdentityCredential:", err)
+			panic(err)
+		}
+		getAssertion := func(ctx context.Context) (string, error) {
+			tk, err := assertionCredentials.GetToken(ctx, policy.TokenRequestOptions{Scopes: []string{"api://AzureADTokenExchange/.default"}})
+			if err != nil {
+				return "", err
+			}
+			return tk.Token, nil
+		}
+		cred, err = azidentity.NewClientAssertionCredential(creds.GraphTenantID, creds.GraphAppID, getAssertion, nil)
+		if err != nil {
+			fmt.Println("Error creating ClientAssertionCredential:", err)
 			panic(err)
 		}
 	} else {

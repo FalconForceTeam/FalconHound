@@ -7,6 +7,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/securityinsights/armsecurityinsights"
@@ -19,6 +21,14 @@ type WatchlistOutputConfig struct {
 	SearchKey     string
 	Overwrite     bool
 }
+
+type WatchlistSession struct {
+	initialized bool
+	credential  azcore.TokenCredential
+}
+
+// Used to persist Watchlist TokenCredential across requests
+var _WatchlistSession WatchlistSession
 
 type WatchlistOutputProcessor struct {
 	*OutputProcessor
@@ -37,12 +47,17 @@ func (m *WatchlistOutputProcessor) BatchSize() int {
 }
 
 func CreateUpdateWatchlist(results internal.QueryResults, WatchlistName string, DisplayName string, SearchKey string, Overwrite bool, creds internal.Credentials) {
-	cred, err := azidentity.NewClientSecretCredential(creds.SentinelTenantID, creds.SentinelAppID, creds.SentinelAppSecret, nil)
-	if err != nil {
-		log.Fatalf("failed to obtain a credential: %v", err)
+	if creds.SentinelAppSecret == "" && (creds.SentinelManagedIdentity == "" || creds.SentinelManagedIdentity == "false") && (creds.SentinelFederatedWorkloadIdentity == "" || creds.SentinelFederatedWorkloadIdentity == "false") {
+		log.Fatalf("SentinelAppSecret is empty and no Managed Identity/Federated Workload Identity Enabled, skipping..")
 	}
+
+	if !_WatchlistSession.initialized {
+		_WatchlistSession.credential = WatchlistTokenCredential(creds)
+		_WatchlistSession.initialized = true
+	}
+
 	ctx := context.Background()
-	clientFactory, err := armsecurityinsights.NewClientFactory(creds.SentinelSubscriptionID, cred, nil)
+	clientFactory, err := armsecurityinsights.NewClientFactory(creds.SentinelSubscriptionID, _WatchlistSession.credential, nil)
 	if err != nil {
 		log.Fatalf("failed to create client: %v", err)
 	}
@@ -141,4 +156,45 @@ func CreateUpdateWatchlist(results internal.QueryResults, WatchlistName string, 
 		log.Printf("failed to finish the request: %v", err)
 	}
 	_ = res
+}
+
+func WatchlistTokenCredential(creds internal.Credentials) azcore.TokenCredential {
+	var cred azcore.TokenCredential
+	var assertionCredentials azcore.TokenCredential
+	var err error
+
+	if creds.SentinelManagedIdentity == "true" {
+		log.Printf("Using Managed Identity for Sentinel")
+		cred, err = azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			fmt.Println("Error creating ManagedIdentityCredential:", err)
+		}
+	} else if creds.SentinelFederatedWorkloadIdentity == "true" {
+		log.Printf("Using Managed Identity to retrieve Federated Workload Identity Assertion Token for Sentinel")
+		assertionCredentials, err = azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			fmt.Println("Error creating ManagedIdentityCredential:", err)
+			panic(err)
+		}
+		getAssertion := func(ctx context.Context) (string, error) {
+			tk, err := assertionCredentials.GetToken(ctx, policy.TokenRequestOptions{Scopes: []string{"api://AzureADTokenExchange/.default"}})
+			if err != nil {
+				return "", err
+			}
+			return tk.Token, nil
+		}
+		cred, err = azidentity.NewClientAssertionCredential(creds.SentinelTenantID, creds.SentinelAppID, getAssertion, nil)
+		if err != nil {
+			fmt.Println("Error creating ClientAssertionCredential:", err)
+			panic(err)
+		}
+	} else {
+		log.Printf("Using Client Secret for Sentinel")
+		cred, err = azidentity.NewClientSecretCredential(creds.SentinelTenantID, creds.SentinelAppID, creds.SentinelAppSecret, nil)
+		if err != nil {
+			fmt.Println("Error creating ClientSecretCredential:", err)
+		}
+	}
+
+	return cred
 }
