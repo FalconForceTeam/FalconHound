@@ -1,3 +1,3 @@
 package internal
 
-const Version = "FalconHound v1.4.2"
+const Version = "FalconHound v1.4.3"
