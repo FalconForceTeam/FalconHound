@@ -71,7 +71,8 @@
                             "LimaCharlie",
                             "Markdown",
                             "JSON",
-                            "HTML"
+                            "HTML",
+                            "EventHub"
                         ]
                     },
                     "Enabled": {
@@ -212,6 +213,38 @@
                                     "type": "integer"
                                 }
                             },
+                            "additionalProperties": false
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "EventHub"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "BHQuery" : {
+                                    "type": "string"
+                                },
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "EventHubName" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                },
+                                "BatchSize" : {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "EventHubName"
+                            ],
                             "additionalProperties": false
                         }
                     },

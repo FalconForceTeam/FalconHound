@@ -32,6 +32,7 @@ type Target struct {
 	BHQuery       string            `yaml:"BHQuery,omitempty"`
 	BatchSize     int               `yaml:"BatchSize,omitempty"`
 	Table         string            `yaml:"Table,omitempty"`
+	EventHubName  string            `yaml:"EventHubName,omitempty"`
 }
 
 type Query struct {
@@ -225,6 +226,18 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 				QueryEventID:     query.ID,
 				BHQuery:          target.BHQuery,
 				Table:            target.Table,
+				BatchSize:        target.BatchSize,
+			},
+		}, nil
+	case "EventHub":
+		return &output_processor.EventHubOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.EventHubOutputConfig{
+				QueryName:        query.Name,
+				QueryDescription: query.Description,
+				QueryEventID:     query.ID,
+				BHQuery:          target.BHQuery,
+				EventHubName:     target.EventHubName,
 				BatchSize:        target.BatchSize,
 			},
 		}, nil
