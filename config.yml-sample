@@ -117,3 +117,16 @@ adx:
   appSecret: xxxxxxxxxxxxxx
   managedIdentity: false
   federatedWorkloadIdentity: false
+
+################################################
+# Add your Azure Event Hub connection information here
+# This can be same app reg as above but Azure Event Hub Sender permissions / SharedKey is required
+################################################
+
+eventhub:
+  hostname: "xxxxxxxx.servicebus.windows.net" 
+  managedIdentity: false
+  federatedWorkloadIdentity: false
+  tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  ConnectionString: Endpoint=sb://xxxxxxx.servicebus.windows.net/;SharedAccessKeyName=xxxxxxxx;SharedAccessKey=xxxxxxxxxxxxxxxx

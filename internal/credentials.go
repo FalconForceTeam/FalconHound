@@ -31,6 +31,13 @@ type Credentials struct {
 	AdxDatabase                       string `config:"adx.database"`
 	AdxManagedIdentity                string `config:"adx.managedIdentity"`
 	AdxFederatedWorkloadIdentity      string `config:"adx.federatedWorkloadIdentity"`
+	EventHubTenantID                  string `config:"eventhub.tenantID"`
+	EventHubAppID                     string `config:"eventhub.appID"`
+	EventHubAppSecret                 string `config:"eventhub.appSecret"`
+	EventHubHostname                  string `config:"eventhub.hostname"`
+	EventHubManagedIdentity           string `config:"eventhub.managedIdentity"`
+	EventHubConnectionString          string `config:"eventhub.connectionString"`
+	EventHubFederatedWorkloadIdentity string `config:"eventhub.federatedWorkloadIdentity"`
 	Neo4jUri                          string `config:"neo4j.uri"`
 	Neo4jUsername                     string `config:"neo4j.username"`
 	Neo4jPassword                     string `config:"neo4j.password"`
