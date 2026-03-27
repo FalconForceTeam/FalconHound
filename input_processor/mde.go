@@ -46,12 +46,19 @@ func (m *MDEProcessor) ExecuteQuery() (internal.QueryResults, error) {
 		return internal.QueryResults{}, fmt.Errorf("MDEAppSecret or MDEClientCertificate is empty and no Managed Identity or Federated Workload Identity set, skipping..")
 	}
 
+	useMSGraph := m.Credentials.MDEUseMSGraph == "true"
+
 	if !_MDESession.initialized {
-		_MDESession.token = MDEToken(m.Credentials)
+		_MDESession.token = MDEToken(m.Credentials, useMSGraph)
 		_MDESession.initialized = true
 	}
 
-	url := "https://api.securitycenter.microsoft.com/api/advancedqueries/run"
+	var url string
+	if useMSGraph {
+		url = "https://graph.microsoft.com/v1.0/security/runHuntingQuery"
+	} else {
+		url = "https://api.securitycenter.microsoft.com/api/advancedqueries/run"
+	}
 
 	body := map[string]string{
 		"Query": m.Query,
@@ -96,7 +103,7 @@ func (m *MDEProcessor) ExecuteQuery() (internal.QueryResults, error) {
 	return MDEResults.Results, nil
 }
 
-func MDEToken(creds internal.Credentials) string {
+func MDEToken(creds internal.Credentials, useMSGraph bool) string {
 	var cred azcore.TokenCredential
 	var assertionCredentials azcore.TokenCredential
 	var err error
@@ -156,8 +163,15 @@ func MDEToken(creds internal.Credentials) string {
 		}
 	}
 
+	var scope string
+	if useMSGraph {
+		scope = "https://graph.microsoft.com/.default"
+	} else {
+		scope = "https://api.securitycenter.microsoft.com/.default"
+	}
+
 	var ctx = context.Background()
-	policy := policy.TokenRequestOptions{Scopes: []string{"https://api.securitycenter.microsoft.com/.default"}}
+	policy := policy.TokenRequestOptions{Scopes: []string{scope}}
 	token, err := cred.GetToken(ctx, policy)
 	if err != nil {
 		fmt.Println("Error getting token:", err)

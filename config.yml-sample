@@ -48,6 +48,7 @@ sentinel:
 # or preferably a different one
 ################################################
 MDE:
+  useMSGraph: false
   managedIdentity: false
   federatedWorkloadIdentity: false
   clientCertificate: false

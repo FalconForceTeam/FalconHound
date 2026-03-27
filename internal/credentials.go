@@ -17,6 +17,7 @@ type Credentials struct {
 	SentinelClientCertificate         string `config:"sentinel.clientCertificate"`
 	SentinelCertPath                  string `config:"sentinel.certPath"`
 	SentinelCertPassword              string `config:"sentinel.certPassword"`
+	MDEUseMSGraph                     string `config:"mde.useMSGraph"`
 	MDETenantID                       string `config:"mde.tenantID"`
 	MDEAppID                          string `config:"mde.appID"`
 	MDEAppSecret                      string `config:"mde.appSecret"`

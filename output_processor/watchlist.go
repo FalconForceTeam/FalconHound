@@ -194,10 +194,12 @@ func WatchlistTokenCredential(creds internal.Credentials) azcore.TokenCredential
 		certData, err := os.ReadFile(creds.SentinelCertPath)
 		if err != nil {
 			fmt.Println("Error reading certificate file:", err)
+			panic(err)
 		}
 		certs, key, err := azidentity.ParseCertificates(certData, []byte(creds.SentinelCertPassword))
 		if err != nil {
 			fmt.Println("Error parsing certificate:", err)
+			panic(err)
 		}
 		cred, err = azidentity.NewClientCertificateCredential(
 			creds.SentinelTenantID,
