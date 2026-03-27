@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
@@ -37,8 +38,8 @@ type SentinelResults struct {
 }
 
 func (m *SentinelProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	if m.Credentials.SentinelAppSecret == "" && (m.Credentials.SentinelManagedIdentity == "" || m.Credentials.SentinelManagedIdentity == "false") && (m.Credentials.SentinelFederatedWorkloadIdentity == "false" || m.Credentials.SentinelFederatedWorkloadIdentity == "") {
-		return internal.QueryResults{}, fmt.Errorf("SentinelAppSecret is empty and no Managed Identity or Federated Workload Identity set, skipping..")
+	if m.Credentials.SentinelAppSecret == "" && (m.Credentials.SentinelClientCertificate == "" || m.Credentials.SentinelClientCertificate == "false") && (m.Credentials.SentinelManagedIdentity == "" || m.Credentials.SentinelManagedIdentity == "false") && (m.Credentials.SentinelFederatedWorkloadIdentity == "false" || m.Credentials.SentinelFederatedWorkloadIdentity == "") {
+		return internal.QueryResults{}, fmt.Errorf("SentinelAppSecret or SentinelClientCertificate is empty and no Managed Identity or Federated Workload Identity set, skipping..")
 	}
 
 	results, err := LArunQuery(m.Query, m.Credentials)
@@ -164,6 +165,33 @@ func getToken(creds internal.Credentials) (string, error) {
 		}
 		token = tk.Token
 
+	} else if creds.SentinelClientCertificate == "true" {
+		log.Printf("Using ClientCertificateCredential for Sentinel")
+		certData, err := os.ReadFile(creds.SentinelCertPath)
+		if err != nil {
+			return "", fmt.Errorf("error reading certificate file: %v", err)
+		}
+		certs, key, err := azidentity.ParseCertificates(certData, []byte(creds.SentinelCertPassword))
+		if err != nil {
+			return "", fmt.Errorf("error parsing certificate: %v", err)
+		}
+		cred, err := azidentity.NewClientCertificateCredential(
+			creds.SentinelTenantID,
+			creds.SentinelAppID,
+			certs,
+			key,
+			nil,
+		)
+		if err != nil {
+			return "", fmt.Errorf("error creating ClientCertificateCredential: %v", err)
+		}
+		ctx := context.Background()
+		policy := policy.TokenRequestOptions{Scopes: []string{"https://api.loganalytics.io/.default"}}
+		tk, err := cred.GetToken(ctx, policy)
+		if err != nil {
+			return "", fmt.Errorf("error getting token: %v", err)
+		}
+		token = tk.Token
 	} else {
 		cfg := auth.AuthConfig{
 			ClientID:     creds.SentinelAppID,

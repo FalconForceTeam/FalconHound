@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 
@@ -41,8 +42,8 @@ type MDESession struct {
 var _MDESession MDESession
 
 func (m *MDEProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	if m.Credentials.MDEAppSecret == "" && (m.Credentials.MDEManagedIdentity == "" || m.Credentials.MDEManagedIdentity == "false") && (m.Credentials.MDEFederatedWorkloadIdentity == "false" || m.Credentials.MDEFederatedWorkloadIdentity == "") {
-		return internal.QueryResults{}, fmt.Errorf("MDEAppSecret is empty and no Managed Identity or Federated Workload Identity set, skipping..")
+	if m.Credentials.MDEAppSecret == "" && (m.Credentials.MDEClientCertificate == "false" || m.Credentials.MDEClientCertificate == "") && (m.Credentials.MDEManagedIdentity == "" || m.Credentials.MDEManagedIdentity == "false") && (m.Credentials.MDEFederatedWorkloadIdentity == "false" || m.Credentials.MDEFederatedWorkloadIdentity == "") {
+		return internal.QueryResults{}, fmt.Errorf("MDEAppSecret or MDEClientCertificate is empty and no Managed Identity or Federated Workload Identity set, skipping..")
 	}
 
 	if !_MDESession.initialized {
@@ -123,6 +124,29 @@ func MDEToken(creds internal.Credentials) string {
 		cred, err = azidentity.NewClientAssertionCredential(creds.MDETenantID, creds.MDEAppID, getAssertion, nil)
 		if err != nil {
 			fmt.Println("Error creating ClientAssertionCredential:", err)
+			panic(err)
+		}
+	} else if creds.MDEClientCertificate == "true" {
+		log.Printf("Using ClientCertificateCredential for MDE")
+		certData, err := os.ReadFile(creds.MDECertPath)
+		if err != nil {
+			fmt.Println("Error reading certificate file:", err)
+			panic(err)
+		}
+		certs, key, err := azidentity.ParseCertificates(certData, []byte(creds.MDECertPassword))
+		if err != nil {
+			fmt.Println("Error parsing certificate:", err)
+			panic(err)
+		}
+		cred, err = azidentity.NewClientCertificateCredential(
+			creds.MDETenantID,
+			creds.MDEAppID,
+			certs,
+			key,
+			nil,
+		)
+		if err != nil {
+			fmt.Println("Error creating ClientCertificateCredential:", err)
 			panic(err)
 		}
 	} else {
