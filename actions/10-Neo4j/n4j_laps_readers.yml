@@ -1,0 +1,29 @@
+Name: Groups with LAPS Read Access
+ID: N4J_LAPS_Readers
+Description: Groups that can read LAPS passwords on computers where LAPS is configured
+Author: Custom
+Version: '1.0'
+Info: |-
+Active: true
+Debug: false
+SourcePlatform: Neo4j
+Query: |
+  MATCH (s:Group)-[:AllExtendedRights|ReadLAPSPassword]->(c:Computer)
+  WHERE NOT s.objectid ENDS WITH '-515'
+  AND c.haslaps = true
+  AND c.enabled = true
+  RETURN {GroupName: s.name, GroupSID: s.objectid,
+          ComputerName: c.name, ComputerSID: c.objectid,
+          UniqueKey: s.objectid + '_' + c.objectid}
+Targets:
+  - Name: CSV
+    Enabled: false
+    Path: output/laps_readers.csv
+  - Name: Sentinel
+    Enabled: false
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_LAPS_Readers
+    DisplayName: LAPS Readers
+    SearchKey: UniqueKey
+    Overwrite: true
