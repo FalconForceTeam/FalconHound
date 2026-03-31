@@ -1,0 +1,40 @@
+Name: Azure Overprivileged Service Principals via MS Graph
+ID: N4J_Azure_MG_Overprivileged_SP
+Description: Service Principals with dangerous Microsoft Graph API permissions that allow privilege escalation in Azure
+Author: Custom
+Version: '1.0'
+Info: |
+  Finds Azure Service Principals that have dangerous Microsoft Graph API
+  permissions assigned. These permissions allow privilege escalation in
+  Azure/Entra ID without any interactive login or MFA.
+
+  Dangerous permissions covered:
+  - AZMGAppRoleAssignment_ReadWrite_All: Assign permissions to any app
+  - AZMGApplication_ReadWrite_All: Modify any app, add secrets
+  - AZMGDirectory_ReadWrite_All: Full directory write access
+  - AZMGGroupMember_ReadWrite_All: Add members to any group including privileged
+  - AZMGGroup_ReadWrite_All: Create and manage groups
+  - AZMGRoleManagement_ReadWrite_Directory: Assign roles - direct path to Global Admin
+  - AZMGServicePrincipalEndpoint_ReadWrite_All: Modify SP endpoints
+
+  Use the watchlist in Sentinel to alert on new entries or changes.
+Active: true
+Debug: false
+SourcePlatform: Neo4j
+Query: |
+  MATCH (s:AZServicePrincipal)-[r:AZMGAppRoleAssignment_ReadWrite_All|AZMGApplication_ReadWrite_All|AZMGDirectory_ReadWrite_All|AZMGGroupMember_ReadWrite_All|AZMGGroup_ReadWrite_All|AZMGRoleManagement_ReadWrite_Directory|AZMGServicePrincipalEndpoint_ReadWrite_All]->(t:AZServicePrincipal)
+  RETURN {SourceName: s.name, SourceSID: s.objectid,
+          TargetName: t.name, TargetSID: t.objectid,
+          UniqueKey: s.objectid + '_' + t.objectid}
+Targets:
+  - Name: CSV
+    Enabled: false
+    Path: output/azure_mg_overprivileged_sp.csv
+  - Name: Sentinel
+    Enabled: false
+  - Name: Watchlist
+    Enabled: true
+    WatchlistName: FH_Azure_MG_Overprivileged_SP
+    DisplayName: Azure Overprivileged Service Principals
+    SearchKey: UniqueKey
+    Overwrite: true
