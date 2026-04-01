@@ -31,6 +31,9 @@ sentinel:
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
   federatedWorkloadIdentity: false
+  clientCertificate: false
+  certPath:
+  certPassword:
   ## All the below information is required
   workspaceID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   subscriptionID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -45,11 +48,15 @@ sentinel:
 # or preferably a different one
 ################################################
 MDE:
+  useMSGraph: false
   managedIdentity: false
   federatedWorkloadIdentity: false
+  clientCertificate: false
   tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
+  certPath:
+  certPassword:
 
 ################################################
 # Add your MS Graph connection information here
@@ -58,9 +65,12 @@ MDE:
 graph:
   managedIdentity: false
   federatedWorkloadIdentity: false
+  clientCertificate: false
   tenantID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   appSecret: xxxxxxxxxxxxxx
+  certPath:
+  certPassword:
 
 ################################################
 # Add your Neo4j connection information here 
