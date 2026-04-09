@@ -14,16 +14,26 @@ type Credentials struct {
 	SentinelWorkspaceName             string `config:"sentinel.workspaceName"`
 	SentinelManagedIdentity           string `config:"sentinel.managedIdentity"`
 	SentinelFederatedWorkloadIdentity string `config:"sentinel.federatedWorkloadIdentity"`
+	SentinelClientCertificate         string `config:"sentinel.clientCertificate"`
+	SentinelCertPath                  string `config:"sentinel.certPath"`
+	SentinelCertPassword              string `config:"sentinel.certPassword"`
+	MDEUseMSGraph                     string `config:"mde.useMSGraph"`
 	MDETenantID                       string `config:"mde.tenantID"`
 	MDEAppID                          string `config:"mde.appID"`
 	MDEAppSecret                      string `config:"mde.appSecret"`
 	MDEManagedIdentity                string `config:"mde.managedIdentity"`
 	MDEFederatedWorkloadIdentity      string `config:"mde.federatedWorkloadIdentity"`
+	MDEClientCertificate              string `config:"mde.clientCertificate"`
+	MDECertPath                       string `config:"mde.certPath"`
+	MDECertPassword                   string `config:"mde.certPassword"`
 	GraphTenantID                     string `config:"graph.tenantID"`
 	GraphAppID                        string `config:"graph.appID"`
 	GraphAppSecret                    string `config:"graph.appSecret"`
 	GraphManagedIdentity              string `config:"graph.managedIdentity"`
 	GraphFederatedWorkloadIdentity    string `config:"graph.federatedWorkloadIdentity"`
+	GraphClientCertificate            string `config:"graph.clientCertificate"`
+	GraphCertPath                     string `config:"graph.certPath"`
+	GraphCertPassword                 string `config:"graph.certPassword"`
 	AdxTenantID                       string `config:"adx.tenantID"`
 	AdxAppID                          string `config:"adx.appID"`
 	AdxAppSecret                      string `config:"adx.appSecret"`

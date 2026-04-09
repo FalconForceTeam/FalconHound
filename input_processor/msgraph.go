@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -39,8 +40,8 @@ type MSGraphResults struct {
 var _MSGraphSession MSGraphSession
 
 func (m *MSGraphProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	if m.Credentials.GraphAppSecret == "" && (m.Credentials.GraphManagedIdentity == "false" || m.Credentials.GraphManagedIdentity == "") && (m.Credentials.GraphFederatedWorkloadIdentity == "false" || m.Credentials.GraphFederatedWorkloadIdentity == "") {
-		return internal.QueryResults{}, fmt.Errorf("GraphAppSecret is empty and no Managed Identity or Federated Workload Identity set, skipping..")
+	if m.Credentials.GraphAppSecret == "" && (m.Credentials.GraphClientCertificate == "false" || m.Credentials.GraphClientCertificate == "") && (m.Credentials.GraphManagedIdentity == "false" || m.Credentials.GraphManagedIdentity == "") && (m.Credentials.GraphFederatedWorkloadIdentity == "false" || m.Credentials.GraphFederatedWorkloadIdentity == "") {
+		return internal.QueryResults{}, fmt.Errorf("GraphAppSecret or GraphClientCertificate is empty and no Managed Identity or Federated Workload Identity set, skipping..")
 	}
 
 	if !_MSGraphSession.initialized {
@@ -123,6 +124,30 @@ func graphToken(creds internal.Credentials) string {
 		cred, err = azidentity.NewClientAssertionCredential(creds.GraphTenantID, creds.GraphAppID, getAssertion, nil)
 		if err != nil {
 			fmt.Println("Error creating ClientAssertionCredential:", err)
+			panic(err)
+		}
+	} else if creds.GraphClientCertificate == "true" {
+		log.Printf("Using ClientCertificateCredential for Graph API")
+		certData, err := os.ReadFile(creds.GraphCertPath)
+		if err != nil {
+			fmt.Println("Error reading certificate file:", err)
+			panic(err)
+		}
+
+		certs, key, err := azidentity.ParseCertificates(certData, []byte(creds.GraphCertPassword))
+		if err != nil {
+			fmt.Println("Error parsing certificate:", err)
+			panic(err)
+		}
+		cred, err = azidentity.NewClientCertificateCredential(
+			creds.GraphTenantID,
+			creds.GraphAppID,
+			certs,
+			key,
+			nil,
+		)
+		if err != nil {
+			fmt.Println("Error creating ClientCertificateCredential:", err)
 			panic(err)
 		}
 	} else {

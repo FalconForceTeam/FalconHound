@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 
@@ -41,16 +42,23 @@ type MDESession struct {
 var _MDESession MDESession
 
 func (m *MDEProcessor) ExecuteQuery() (internal.QueryResults, error) {
-	if m.Credentials.MDEAppSecret == "" && (m.Credentials.MDEManagedIdentity == "" || m.Credentials.MDEManagedIdentity == "false") && (m.Credentials.MDEFederatedWorkloadIdentity == "false" || m.Credentials.MDEFederatedWorkloadIdentity == "") {
-		return internal.QueryResults{}, fmt.Errorf("MDEAppSecret is empty and no Managed Identity or Federated Workload Identity set, skipping..")
+	if m.Credentials.MDEAppSecret == "" && (m.Credentials.MDEClientCertificate == "false" || m.Credentials.MDEClientCertificate == "") && (m.Credentials.MDEManagedIdentity == "" || m.Credentials.MDEManagedIdentity == "false") && (m.Credentials.MDEFederatedWorkloadIdentity == "false" || m.Credentials.MDEFederatedWorkloadIdentity == "") {
+		return internal.QueryResults{}, fmt.Errorf("MDEAppSecret or MDEClientCertificate is empty and no Managed Identity or Federated Workload Identity set, skipping..")
 	}
 
+	useMSGraph := m.Credentials.MDEUseMSGraph == "true"
+
 	if !_MDESession.initialized {
-		_MDESession.token = MDEToken(m.Credentials)
+		_MDESession.token = MDEToken(m.Credentials, useMSGraph)
 		_MDESession.initialized = true
 	}
 
-	url := "https://api.securitycenter.microsoft.com/api/advancedqueries/run"
+	var url string
+	if useMSGraph {
+		url = "https://graph.microsoft.com/v1.0/security/runHuntingQuery"
+	} else {
+		url = "https://api.securitycenter.microsoft.com/api/advancedqueries/run"
+	}
 
 	body := map[string]string{
 		"Query": m.Query,
@@ -95,7 +103,7 @@ func (m *MDEProcessor) ExecuteQuery() (internal.QueryResults, error) {
 	return MDEResults.Results, nil
 }
 
-func MDEToken(creds internal.Credentials) string {
+func MDEToken(creds internal.Credentials, useMSGraph bool) string {
 	var cred azcore.TokenCredential
 	var assertionCredentials azcore.TokenCredential
 	var err error
@@ -125,6 +133,29 @@ func MDEToken(creds internal.Credentials) string {
 			fmt.Println("Error creating ClientAssertionCredential:", err)
 			panic(err)
 		}
+	} else if creds.MDEClientCertificate == "true" {
+		log.Printf("Using ClientCertificateCredential for MDE")
+		certData, err := os.ReadFile(creds.MDECertPath)
+		if err != nil {
+			fmt.Println("Error reading certificate file:", err)
+			panic(err)
+		}
+		certs, key, err := azidentity.ParseCertificates(certData, []byte(creds.MDECertPassword))
+		if err != nil {
+			fmt.Println("Error parsing certificate:", err)
+			panic(err)
+		}
+		cred, err = azidentity.NewClientCertificateCredential(
+			creds.MDETenantID,
+			creds.MDEAppID,
+			certs,
+			key,
+			nil,
+		)
+		if err != nil {
+			fmt.Println("Error creating ClientCertificateCredential:", err)
+			panic(err)
+		}
 	} else {
 		cred, err = azidentity.NewClientSecretCredential(creds.MDETenantID, creds.MDEAppID, creds.MDEAppSecret, nil)
 		if err != nil {
@@ -132,8 +163,15 @@ func MDEToken(creds internal.Credentials) string {
 		}
 	}
 
+	var scope string
+	if useMSGraph {
+		scope = "https://graph.microsoft.com/.default"
+	} else {
+		scope = "https://api.securitycenter.microsoft.com/.default"
+	}
+
 	var ctx = context.Background()
-	policy := policy.TokenRequestOptions{Scopes: []string{"https://api.securitycenter.microsoft.com/.default"}}
+	policy := policy.TokenRequestOptions{Scopes: []string{scope}}
 	token, err := cred.GetToken(ctx, policy)
 	if err != nil {
 		fmt.Println("Error getting token:", err)

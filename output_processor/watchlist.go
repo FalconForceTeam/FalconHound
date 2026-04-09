@@ -5,6 +5,7 @@ import (
 	"falconhound/internal"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -47,8 +48,8 @@ func (m *WatchlistOutputProcessor) BatchSize() int {
 }
 
 func CreateUpdateWatchlist(results internal.QueryResults, WatchlistName string, DisplayName string, SearchKey string, Overwrite bool, creds internal.Credentials) {
-	if creds.SentinelAppSecret == "" && (creds.SentinelManagedIdentity == "" || creds.SentinelManagedIdentity == "false") && (creds.SentinelFederatedWorkloadIdentity == "" || creds.SentinelFederatedWorkloadIdentity == "false") {
-		log.Fatalf("SentinelAppSecret is empty and no Managed Identity/Federated Workload Identity Enabled, skipping..")
+	if creds.SentinelAppSecret == "" && (creds.SentinelClientCertificate == "" || creds.SentinelClientCertificate == "false") && (creds.SentinelManagedIdentity == "" || creds.SentinelManagedIdentity == "false") && (creds.SentinelFederatedWorkloadIdentity == "" || creds.SentinelFederatedWorkloadIdentity == "false") {
+		log.Fatalf("SentinelAppSecret or SentinelClientCertificate is empty and no Managed Identity/Federated Workload Identity Enabled, skipping..")
 	}
 
 	if !_WatchlistSession.initialized {
@@ -186,6 +187,29 @@ func WatchlistTokenCredential(creds internal.Credentials) azcore.TokenCredential
 		cred, err = azidentity.NewClientAssertionCredential(creds.SentinelTenantID, creds.SentinelAppID, getAssertion, nil)
 		if err != nil {
 			fmt.Println("Error creating ClientAssertionCredential:", err)
+			panic(err)
+		}
+	} else if creds.SentinelClientCertificate == "true" {
+		log.Printf("Using ClientCertificateCredential for Sentinel")
+		certData, err := os.ReadFile(creds.SentinelCertPath)
+		if err != nil {
+			fmt.Println("Error reading certificate file:", err)
+			panic(err)
+		}
+		certs, key, err := azidentity.ParseCertificates(certData, []byte(creds.SentinelCertPassword))
+		if err != nil {
+			fmt.Println("Error parsing certificate:", err)
+			panic(err)
+		}
+		cred, err = azidentity.NewClientCertificateCredential(
+			creds.SentinelTenantID,
+			creds.SentinelAppID,
+			certs,
+			key,
+			nil,
+		)
+		if err != nil {
+			fmt.Println("Error creating ClientCertificateCredential:", err)
 			panic(err)
 		}
 	} else {
