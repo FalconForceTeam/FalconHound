@@ -34,6 +34,41 @@ Targets:                    # Targets are the platforms that this action will pu
     Enabled: true
     Table: FalconHound
     BatchSize: 1000   # Number of records to push to ADX in one batch, these will show up in the ADX table as 1 row with an array of values
+  - Name: BloodHoundOpenGraph
+    Enabled: false
+    PostMode: PerAction   # PerAction uploads one OpenGraph payload for this action, MergeAll combines all OpenGraph targets and uploads once at the end of the run
+    Template: |
+      {
+        "edges": [
+          {
+            "kind": "HasSession",
+            "start": {
+              "match_by": "property",
+              "kind": "Computer",
+              "property_matchers": [
+                {
+                  "operator": "equals",
+                  "key": "name",
+                  "value": {{ json .DeviceName }}
+                }
+              ]
+            },
+            "end": {
+              "match_by": "id",
+              "kind": "User",
+              "value": {{ json .AccountSid }}
+            },
+            "properties": {
+              "source": {{ json "falconhound" }},
+              "since": {{ json .Timestamp }}
+            }
+          }
+        ]
+      }
+    Parameters:
+      DeviceName: DeviceName
+      AccountSid: AccountSid
+      Timestamp: Timestamp
   - Name: Markdown
     Enabled: true
     Path: reports/{{date}}/get_sessions_mde.md

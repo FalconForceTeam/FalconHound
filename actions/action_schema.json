@@ -65,6 +65,7 @@
                             "Splunk",
                             "Watchlist",
                             "BloodHound",
+                            "BloodHoundOpenGraph",
                             "BHSession",
                             "LogScale",
                             "ADX",
@@ -288,6 +289,45 @@
                                     "type": "integer"
                                 }
                             },
+                            "additionalProperties": false
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "Name": {
+                                    "const": "BloodHoundOpenGraph"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "Name" : {
+                                    "type": "string"
+                                },
+                                "Enabled": {
+                                    "type": "boolean"
+                                },
+                                "Template": {
+                                    "type": "string"
+                                },
+                                "PostMode": {
+                                    "type": "string",
+                                    "enum": [
+                                        "PerAction",
+                                        "MergeAll"
+                                    ]
+                                },
+                                "Parameters": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "Template"
+                            ],
                             "additionalProperties": false
                         }
                     },

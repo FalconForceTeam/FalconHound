@@ -125,20 +125,7 @@ func QueryBloodhoundAPI(uri string, method string, body []byte, creds internal.C
 }
 
 func (m *BHSessionOutputProcessor) UploadData(data []byte) error {
-	upload_job, err := QueryBloodhoundAPI("/api/v2/file-upload/start", "POST", nil, m.Credentials)
-	if err != nil {
-		return err
-	}
-	job_id := upload_job.Data.Id
-	_, err = QueryBloodhoundAPI(fmt.Sprintf("/api/v2/file-upload/%d", job_id), "POST", data, m.Credentials)
-	if err != nil {
-		return err
-	}
-	_, err = QueryBloodhoundAPI(fmt.Sprintf("/api/v2/file-upload/%d/end", job_id), "POST", nil, m.Credentials)
-	if err != nil {
-		return err
-	}
-	return nil
+	return UploadBloodHoundData(data, m.Credentials)
 }
 
 type CypherSearch struct {

@@ -19,11 +19,11 @@ Query: |
     | where LogonType !in (3,7)
     | where not(TargetUserSid matches regex excludeSid)
     | where TargetDomainName !in ('NT AUTHORITY','NT Service')
-    | extend ComputerName = tostring(split(Computer, '.')[0]), DomainName = strcat(tostring(split(Computer, '.')[-2]), '.', tostring(split(Computer, '.')[-1]))
+    | extend ComputerName = tostring(split(Computer, '.')[0]), DomainName = strcat(tostring(split(Computer, '.')[-2]), '.', tostring(split(Computer, '.')[-1])), Computer=toupper(Computer)
     | summarize Timestamp=arg_min(TimeGenerated,0) by Computer,TargetUserSid,TargetUserName,TargetDomainName,IpAddress
 Targets:                                                   # Targets are the platforms that this action will push to (CSV, Neo4j, Sentinel, Wachlist, Slack, Teams, Splunk, Markdown)
   - Name: Neo4j
-    Enabled: true
+    Enabled: false
     Query: |
       WITH toUpper($Computer) as Computer, toUpper($TargetUserSid) as TargetUserSid, $Timestamp as Timestamp
       MATCH (x:Computer {name:Computer}) MATCH (y:User {objectid:TargetUserSid}) MERGE (x)-[r:HasSession]->(y) SET r.since=Timestamp SET r.source='falconhound'
@@ -35,6 +35,41 @@ Targets:                                                   # Targets are the pla
     Enabled: false
     Query: |
       MATCH (x:Computer {name:$Computer}) MATCH (y:User {objectid:$TargetUserSid}) MERGE (x)-[r:HasSession]->(y) SET r.since=$Timestamp SET r.source='falconhound'
+    Parameters:
+      Computer: Computer
+      TargetUserSid: TargetUserSid
+      Timestamp: Timestamp
+  - Name: BloodHoundOpenGraph
+    Enabled: true
+    PostMode: PerAction
+    Template: |
+      {
+        "edges": [
+          {
+            "kind": "HasSession",
+            "start": {
+              "match_by": "property",
+              "kind": "Machine",
+              "property_matchers": [
+                {
+                  "operator": "equals",
+                  "key": "name",
+                  "value": {{ json .Computer }}
+                }
+              ]
+            },
+            "end": {
+              "match_by": "id",
+              "kind": "User",
+              "value": {{ json .TargetUserSid }}
+            },
+            "properties": {
+              "source": {{ json "falconhound" }},
+              "since": {{ json .Timestamp }}
+            }
+          }
+        ]
+      }
     Parameters:
       Computer: Computer
       TargetUserSid: TargetUserSid

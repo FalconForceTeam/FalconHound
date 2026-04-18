@@ -23,8 +23,10 @@ type Target struct {
 	Enabled       bool              `yaml:"Enabled"`
 	Path          string            `yaml:"Path,omitempty"`
 	Query         string            `yaml:"Query,omitempty"`
+	Template      string            `yaml:"Template,omitempty"`
 	Message       string            `yaml:"Message,omitempty"`
 	Parameters    map[string]string `yaml:"Parameters,omitempty"`
+	PostMode      string            `yaml:"PostMode,omitempty"`
 	WatchlistName string            `yaml:"WatchlistName,omitempty"`
 	Overwrite     bool              `yaml:"Overwrite,omitempty"`
 	DisplayName   string            `yaml:"DisplayName,omitempty"`
@@ -270,6 +272,15 @@ func makeOutputProcessor(target Target, query Query, credentials internal.Creden
 			Config: output_processor.BloodHoundOutputConfig{
 				Parameters: target.Parameters,
 				Query:      target.Query,
+			},
+		}, nil
+	case "BloodHoundOpenGraph":
+		return &output_processor.BloodHoundOpenGraphOutputProcessor{
+			OutputProcessor: &baseOutput,
+			Config: output_processor.BloodHoundOpenGraphOutputConfig{
+				Template:   target.Template,
+				Parameters: target.Parameters,
+				PostMode:   target.PostMode,
 			},
 		}, nil
 	case "Watchlist":
@@ -568,6 +579,9 @@ func run(actionsDir string, configFile string, keyvaultFlag bool, actionIdFilter
 				logError(errorLog, "Error finalizing output for %#v: %w", outputProcessor, err)
 			}
 		}
+	}
+	if err := output_processor.FinalizeSharedOutputProcessors(); err != nil {
+		logError(errorLog, "Error finalizing shared outputs: %v", err)
 	}
 	logInfo("[=] All done ... finished in %.f seconds", time.Since(startTime).Seconds())
 }

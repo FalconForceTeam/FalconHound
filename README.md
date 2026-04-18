@@ -70,6 +70,7 @@ Currently, FalconHound supports the following data sources and or targets:
 - BloodHound CE and BHE (early stage)
 - MarkDown files 
 - Elastic (early stage)
+- BloodHound OpenGraph uploads
 
 Additional data sources and targets are planned for the future.
 
@@ -299,6 +300,52 @@ Like Sentinel, Splunk will write the results of the query to a ADX table. The da
 To create a table in ADX you can use the following command:
 ```kql
 .create table FalconHound (Name: string, Description: string, EventID: string, BHQuery: string, EventData: dynamic, Timestamp: datetime) 
+```
+
+#### BloodHound OpenGraph
+
+The `BloodHoundOpenGraph` target renders an OpenGraph JSON fragment for each query result row, merges the rows into a single `{"graph":{"nodes":[],"edges":[]}}` payload, and uploads it to BloodHound through the signed API upload flow.
+
+Use `PostMode: PerAction` to upload one OpenGraph payload per action, or `PostMode: MergeAll` to combine all `BloodHoundOpenGraph` targets in the current run and upload them once at the end.
+
+Templates are rendered with Go `text/template` and expose all query result fields directly. Use `{{ json .FieldName }}` for JSON-safe substitution.
+
+```yaml
+  - Name: BloodHoundOpenGraph
+    Enabled: true
+    PostMode: PerAction
+    Template: |
+      {
+        "edges": [
+          {
+            "kind": "HasSession",
+            "start": {
+              "match_by": "property",
+              "kind": "Computer",
+              "property_matchers": [
+                {
+                  "operator": "equals",
+                  "key": "name",
+                  "value": {{ json .Computer }}
+                }
+              ]
+            },
+            "end": {
+              "match_by": "id",
+              "kind": "User",
+              "value": {{ json .TargetUserSid }}
+            },
+            "properties": {
+              "source": {{ json "falconhound" }},
+              "since": {{ json .Timestamp }}
+            }
+          }
+        ]
+      }
+    Parameters:
+      Computer: Computer
+      TargetUserSid: TargetUserSid
+      Timestamp: Timestamp
 ```
 
 ### Extensions to the graph
